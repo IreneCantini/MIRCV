@@ -1,4 +1,4 @@
-package it.unipi.dii.aide.mircv.data_structures_management;
+package it.unipi.dii.aide.mircv.basic.data_structures_management;
 
 import java.util.ArrayList;
 
