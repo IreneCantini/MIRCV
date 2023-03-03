@@ -80,37 +80,30 @@ public class TextPreprocesser {
     //performs stopwords removal
     public static ArrayList<String> removeStopwords(ArrayList<String> tokens) throws IOException {
         //open and reading stopwords file
-        List<String> stopwords = Files.readAllLines(Paths.get("src/main/java/it/unipi/dii/aide/mircv/basic/resources/stopwords.txt"));
+        List<String> stopwords = Files.readAllLines(Paths.get("src/main/resources/stopwords.txt"));
 
         //remove stopwords
         tokens.removeAll(stopwords);
         return tokens;
     }
 
-    public static void executeTextPreprocessing() throws IOException {
-        //open and read collection
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("src/main/java/it/unipi/dii/aide/mircv/basic/resources/collection_prova.tsv"), StandardCharsets.UTF_8));
-        String line = reader.readLine();
+    public static ArrayList<String> executeTextPreprocessing(String line) throws IOException {
 
         ArrayList<String> tokens = new ArrayList<>();
 
-        while (line != null){
+        //Preprocessing Text
+        line = cleanText(line);
 
-            //Preprocessing Text
-            line = cleanText(line);
+        //Tokenize
+        tokens = tokenizeLine(line);
 
-            //Tokenize
-            tokens = tokenizeLine(line);
+        //remove stopwords (checking the flag)
+        tokens = removeStopwords(tokens);
 
-            //remove stopwords (checking the flag)
-            tokens = removeStopwords(tokens);
+        //perform stemming
+        tokens = stemmingToken(tokens);
 
-            //perform stemming
-            tokens = stemmingToken(tokens);
+        return tokens;
 
-            System.out.println(tokens);
-
-            line = reader.readLine();
-        }
     }
 }

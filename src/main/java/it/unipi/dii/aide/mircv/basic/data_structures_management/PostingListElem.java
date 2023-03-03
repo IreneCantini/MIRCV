@@ -1,8 +1,8 @@
 package it.unipi.dii.aide.mircv.basic.data_structures_management;
 
 public class PostingListElem {
-    private Long docID;
-    private Integer termFrequency;
+    private long docID;
+    private int termFrequency;
 
     PostingListElem(long docID, int f) {
         this.docID = docID;
@@ -16,6 +16,7 @@ public class PostingListElem {
     public Long getDocID() {
         return docID;
     }
+
 
     /*
     private String term;
@@ -49,9 +50,7 @@ public class PostingListElem {
         return docs;
     }
 
-    public String getTerm() {
-        return term;
-    }
+
 
     public long getLastElement(){
         return this.docs.get(this.docs.size() - 1);

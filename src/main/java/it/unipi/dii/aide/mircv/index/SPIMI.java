@@ -1,53 +1,26 @@
 package it.unipi.dii.aide.mircv.index;
 
 import it.unipi.dii.aide.mircv.basic.data_structures_management.*;
+import it.unipi.dii.aide.mircv.basic.text_preprocessing.TextPreprocesser;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 
 public class SPIMI {
     /* HashMap <Term, Position> that maintains the position of the term within the two arrays */
-    HashMap<String, Integer> positionTerm = new HashMap<>();
-
-
-    /* *** FILE CHANNEL VARIABLES *** */
-
-    /* Channel connected to file containing the document information */
-    private FileChannel fileChannelDocIndex;
-
-    /* Channel connected to file containing the (new) dictionary file */
-    private FileChannel fileChannelDict_new;
-
-    /* Channel connected to file containing the (new, maybe updated) posting lists for each term */
-    private FileChannel fileChannelII_doc_new;
-
-    /* Channel connected to file containing the (new, maybe updated) frequencies for each term */
-    private FileChannel fileChannelII_freq_new;
-
-    private FileChannel fileChannel_skipping;
-
-    /* *** ARRAY CONTAINING FILE CHANNEL OF TEMPORARY FILES *** */
-    private ArrayList<FileChannel> listFileChannelsDict;
-
-    private ArrayList<FileChannel> listFileChannelsDoc;
-
-    private ArrayList<FileChannel> listFileChannelsFreq;
+    public static HashMap<String, Integer> positionTerm = new HashMap<>();
 
     /* *** IN-MEMORY STRUCTURES DECLARATION *** */
 
     /* Array containing the posting lists for each term parsed in the current block */
-    private ArrayList<PostingList> listTerm;
+    public static ArrayList<PostingList> listTerm;
 
     /* Array containing the information of the terms parsed in the current block */
-    private ArrayList<DictionaryElem> listTermDict;
+    public static ArrayList<DictionaryElem> listTermDict;
+
 
     /*Variable maintaining the total document's length to compute the average*/
     public double totalLengthDoc=0;
@@ -55,57 +28,72 @@ public class SPIMI {
     public SPIMI(){
         listTerm=new ArrayList<>();
         listTermDict= new ArrayList<>();
+        /*
         listFileChannelsDict = new ArrayList<>();
         listFileChannelsDoc = new ArrayList<>();
         listFileChannelsFreq = new ArrayList<>();
+         */
 
-    }
-
-    public void createFileDocumentIndex() throws IOException {
-        String filePath = "src/main/resources/document_index.dat";
-        // Inizializziamo il file
-        File file = new File(filePath);
-        if(!file.createNewFile()){
-            System.out.println("Non è stato possibile creare il file del document index");
-        }
-        else{
-            Path path_docI = Path.of("src/main/resources/document_index.dat");
-
-            this.fileChannelDocIndex=(FileChannel) Files
-                    .newByteChannel(path_docI, EnumSet.of(
-                            StandardOpenOption.READ,
-                            StandardOpenOption.WRITE
-                    ));
-        }
     }
 
     /**
-     * Aggiorniamo la struttura in memoria
-     * @param docTerm
-     * @param docId
+     * Legge tutti i documenti e inserimento informazioni in strutture dati in memoria
      */
-    public void invert(ArrayList<String> docTerm, Integer docId, String docNo) throws IOException {
+    public void invert() throws IOException, InterruptedException {
 
         int freq;
+        long docid=0;
+        String docNo;
 
-        totalLengthDoc+=docTerm.size();
+        long MaxUsableMememory=Runtime.getRuntime().maxMemory()*80/100;
 
-        DocumentIndexElem doc= new DocumentIndexElem(docId, docNo, docTerm.size());
-        writeOneDoc(doc);
+        //open and read collection
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("src/main/resources/collection_prova.tsv"), StandardCharsets.UTF_8));
+        String line = reader.readLine();
 
-        for (String t: docTerm) {
-            freq = Collections.frequency(docTerm, t);
-            //taglio il token a 20 caratteri
-            if (t.length()>20)
-                t=t.substring(0,20);
+        while (line != null) {
 
-            if (positionTerm.get(t) == null)
-                //il termine non è presente
-                AddTerm(t,docId, freq);
-            else
-                //il termine è già presente quindi devo solo aggiungere un posting
-                AddPost(positionTerm.get(t), docId, freq);
+            ArrayList<String> tokens= new ArrayList<>();
+            tokens= TextPreprocesser.executeTextPreprocessing(line);
+
+            totalLengthDoc+=tokens.size();
+
+            docid = docid + 1;
+            docNo=tokens.get(0);
+            tokens.remove(0);
+
+            FileMenagement.writeOneDoc(new DocumentIndexElem(docid, docNo, tokens.size()));
+
+            for (String t: tokens) {
+                freq = Collections.frequency(tokens, t);
+                //taglio il token a 20 caratteri
+                if (t.length()>20)
+                    t=t.substring(0,20);
+
+                if (positionTerm.get(t) == null)
+                    //il termine non è presente
+                    AddTerm(t,docid, freq);
+                else
+                    //il termine è già presente quindi devo solo aggiungere un posting
+                    AddPost(positionTerm.get(t), docid, freq);
+            }
+
+            if(Runtime.getRuntime().totalMemory()>MaxUsableMememory) {
+                FileMenagement.insertOnDisk();
+                System.out.println("SONO ARRIVATA AL 80%");
+                System.out.println("docID processato: "+docid);
+
+                while (Runtime.getRuntime().totalMemory()>MaxUsableMememory)
+                {
+                    System.gc();
+                    Thread.sleep(100);
+                }
+            }
+
+            line = reader.readLine();
         }
+        FileMenagement.insertOnDisk();
+
     }
 
     /**
@@ -116,11 +104,8 @@ public class SPIMI {
      */
     private void AddTerm(String t, long docId, int freq) {
 
-        PostingList newTerm = new PostingList(t, docId, freq);
-        DictionaryElem d = new DictionaryElem(t, 1, freq);
-
-        this.listTerm.add(newTerm);
-        this.listTermDict.add(d);
+        this.listTerm.add(new PostingList(t, docId, freq));
+        this.listTermDict.add(new DictionaryElem(t, 1, freq));
         this.positionTerm.put(t, this.listTerm.size()-1);
     }
 
