@@ -1,5 +1,8 @@
 package it.unipi.dii.aide.mircv.basic.data_structures_management;
 
+import java.nio.MappedByteBuffer;
+import java.nio.charset.StandardCharsets;
+
 public class DictionaryElem {
     private String term;
     private int documentFrequency; //in quanti documenti compare il termine
@@ -130,5 +133,6 @@ public class DictionaryElem {
     public void setLengthSkippingList(int lengthSkippingList) {
         this.lengthSkippingList = lengthSkippingList;
     }
+
 
 }

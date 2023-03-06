@@ -7,7 +7,7 @@ import static java.lang.Math.log;
 
 public class VariableByte {
     // converte un long nella sua codifica variable byte
-    public byte[] fromLongToVariableByte(long n){
+    public static byte[] fromLongToVariableByte(long n){
         if (n == 0) {
             return new byte[]{0};
         }
@@ -50,7 +50,7 @@ public class VariableByte {
     }
 
     // preso un array di byte rappresentati la codifica variable byte di long restituisce un array contenente i long corrispondenti
-    public ArrayList<Long> fromVariableByteToLong(byte[] byteStream) {
+    public static ArrayList<Long> fromVariableByteToLong(byte[] byteStream) {
         ArrayList<Long> numbers = new ArrayList<>();
         long n = 0;
         for (byte b : byteStream) {

@@ -10,13 +10,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
-public class FileMenagement {
+public class FileManagement {
 
 
     /* *** FILE CHANNEL VARIABLES *** */
@@ -28,9 +29,12 @@ public class FileMenagement {
 
     private static ArrayList<FileChannel> listFileChannelsFreq;
 
+    private static FileChannel fileChannelIIDoc;
+    private static FileChannel fileChannelIIFreq;
+    private static FileChannel fileChannelDict;
     private static FileChannel fileChannelDocIndex;
 
-    public FileMenagement(){
+    public FileManagement(){
         listFileChannelsDict=new ArrayList<>();
         listFileChannelsDoc=new ArrayList<>();
         listFileChannelsFreq=new ArrayList<>();
@@ -140,6 +144,70 @@ public class FileMenagement {
         writeDictionaryToFile();
     }
 
+
+    /**
+     * Creazione dei file finali contenenti tutto il dizionario e i due II derivanti dalla collection
+     * @throws IOException
+     */
+
+    public static void createNewFiles() throws IOException {
+        String filePath = "src/main/resources/dictionary.dat";
+
+        File file = new File(filePath);
+        file.createNewFile();
+
+        Path pathII = Path.of("src/main/resources/dictionary.dat");
+       fileChannelDict=(FileChannel) Files
+                .newByteChannel(pathII, EnumSet.of(
+                        StandardOpenOption.READ,
+                        StandardOpenOption.WRITE,
+                        StandardOpenOption.TRUNCATE_EXISTING
+                ));
+
+        filePath = "src/main/resources/inverted_index_doc.dat";
+        // Inizializziamo il file
+        file = new File(filePath);
+        if(!file.createNewFile())
+            System.out.println("errore creazione file");
+
+        pathII = Path.of("src/main/resources/inverted_index_doc.dat");
+        fileChannelIIDoc=(FileChannel) Files
+                .newByteChannel(pathII, EnumSet.of(
+                        StandardOpenOption.READ,
+                        StandardOpenOption.WRITE,
+                        StandardOpenOption.TRUNCATE_EXISTING
+                ));
+
+        filePath = "src/main/resources/inverted_index_freq.dat";
+        // Inizializziamo il file
+        file = new File(filePath);
+        file.createNewFile();
+
+        pathII = Path.of("src/main/resources/inverted_index_freq.dat");
+        fileChannelIIFreq=(FileChannel) Files
+                .newByteChannel(pathII, EnumSet.of(
+                        StandardOpenOption.READ,
+                        StandardOpenOption.WRITE,
+                        StandardOpenOption.TRUNCATE_EXISTING
+                ));
+
+        filePath = "src/main/resources/skipping_file.dat";
+        // Inizializziamo il file
+        file = new File(filePath);
+        file.createNewFile();
+        /*
+        pathII = Path.of("src/main/resources/skipping_file.dat");
+        this.fileChannel_skipping=(FileChannel) Files
+                .newByteChannel(pathII, EnumSet.of(
+                        StandardOpenOption.READ,
+                        StandardOpenOption.WRITE,
+                        StandardOpenOption.TRUNCATE_EXISTING
+                ));
+
+         */
+    }
+
+
     /**
      * Funzione per svolgere le scritture sui file puntati dai vari filechannel
      * @param b
@@ -158,17 +226,19 @@ public class FileMenagement {
                     .map(FileChannel.MapMode.READ_WRITE, listFileChannelsFreq.get(listFileChannelsFreq.size()-1).size(), endByte);
             case "docIndex" -> fileChannelDocIndex
                     .map(FileChannel.MapMode.READ_WRITE, fileChannelDocIndex.size(), endByte);
-            /*
-            case "new_dict" -> fileChannelDict_new
-                    .map(FileChannel.MapMode.READ_WRITE, fileChannelDict_new.size(), endByte);
-            case "docII_new" -> fileChannelII_doc_new
-                    .map(FileChannel.MapMode.READ_WRITE, fileChannelII_doc_new.size(), endByte);
-            case "freqII_new" -> fileChannelII_freq_new
-                    .map(FileChannel.MapMode.READ_WRITE, fileChannelII_freq_new.size(), endByte);
 
+            case "new_dict" -> fileChannelDict
+                    .map(FileChannel.MapMode.READ_WRITE, fileChannelDict.size(), endByte);
+            case "docII_new" -> fileChannelIIDoc
+                    .map(FileChannel.MapMode.READ_WRITE, fileChannelIIDoc.size(), endByte);
+            case "freqII_new" -> fileChannelIIFreq
+                    .map(FileChannel.MapMode.READ_WRITE, fileChannelIIFreq.size(), endByte);
+            /*
             case "skipping" -> fileChannel_skipping
                     .map(FileChannel.MapMode.READ_WRITE, fileChannel_skipping.size(), endByte);
+
              */
+
             default -> null;
         };
 
@@ -245,6 +315,41 @@ public class FileMenagement {
         // Scrivo doclength
         bytes = ByteBuffer.allocate(8).putLong(doc.getLength()).array();
         writeByteToFile(bytes, "docIndex", 8);
+    }
+
+
+    public static int getSizeFileTempDocs() { return listFileChannelsDoc.size(); }
+
+    public static int getSizeFileTempDicts() {
+        System.out.println("Size dicts: " + listFileChannelsDict.size());
+        return listFileChannelsDict.size(); }
+
+    public static ArrayList<FileChannel> getDicts() { return listFileChannelsDict; }
+
+    public static ArrayList<FileChannel> getDocs() { return listFileChannelsDoc; }
+
+    public static ArrayList<FileChannel> getFreqs() { return listFileChannelsFreq; }
+
+    public static FileChannel getIIDoc() { return fileChannelIIDoc; }
+
+    public static FileChannel getIIFreq() { return fileChannelIIFreq; }
+
+    public static FileChannel getDict() { return fileChannelDict; }
+
+    public static DictionaryElem convertToDictionaryObject(MappedByteBuffer array) {
+        DictionaryElem d = new DictionaryElem();
+
+        d.setTerm(StandardCharsets.UTF_8.decode(array.slice(0,20)).toString());
+        d.setDocumentFrequency(array.slice(20, 4).getInt());
+        d.setCollectionFrequency(array.slice(24, 8).getLong());
+        d.setOffset_start_doc(array.slice(32, 8).getLong());
+        d.setLengthPostingList_doc(array.slice(40, 4).getInt());
+        d.setOffset_start_freq(array.slice(44, 8).getLong());
+        d.setLengthPostingList_freq(array.slice(52, 4).getInt());
+        d.setOffset_start_skipping(array.slice(56, 8).getLong());
+        d.setLengthSkippingList(array.slice(64, 4).getInt());
+
+        return d;
     }
 }
 
