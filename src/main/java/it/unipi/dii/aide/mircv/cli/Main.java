@@ -15,6 +15,5 @@ public class Main {
 
         fm.createFileDocumentIndex();
         s.invert();
-
     }
 }

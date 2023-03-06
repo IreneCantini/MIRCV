@@ -6,6 +6,7 @@ import it.unipi.dii.aide.mircv.basic.data_structures_management.DictionaryElem;
 import it.unipi.dii.aide.mircv.basic.data_structures_management.PostingList;
 import it.unipi.dii.aide.mircv.basic.data_structures_management.PostingListElem;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -177,5 +178,26 @@ public class Util {
             System.out.println(operation + " done in " + minutes + ":0" + seconds + " minutes");
         else
             System.out.println(operation + " done in " + minutes + ":" + seconds + " minutes");
+    }
+
+    public static void deleteFile() throws IOException, InterruptedException {
+
+        for(int i = 0; i < FileManagement.getDicts().size(); i++) {
+            FileManagement.getDicts().get(i).close();
+            FileManagement.getDocs().get(i).close();
+            FileManagement.getFreqs().get(i).close();
+            deleteFile_utility("Dictionary_"+i);
+            deleteFile_utility("II_Doc_"+i);
+            deleteFile_utility("II_Freq_"+i);
+        }
+    }
+
+    private static void deleteFile_utility(String fileName) throws InterruptedException {
+        File file = new File("src/main/resources/"+ fileName + ".dat");
+
+        //creiamo questo while per essere sicuri che il file venga eliminato
+        while(!file.delete()) {
+            Thread.sleep(100);
+        }
     }
 }

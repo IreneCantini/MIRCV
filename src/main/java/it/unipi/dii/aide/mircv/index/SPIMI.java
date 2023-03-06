@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import static it.unipi.dii.aide.mircv.index.Util.deleteFile;
 import static it.unipi.dii.aide.mircv.index.Util.formatTime;
 
 public class SPIMI {
@@ -105,6 +106,7 @@ public class SPIMI {
         long stop = System.currentTimeMillis();
         formatTime(start, stop, "Merge");
 
+        deleteFile();
         Util.printII(FileManagement.getDict(), FileManagement.getIIDoc(), FileManagement.getIIFreq(), null);
     }
 
