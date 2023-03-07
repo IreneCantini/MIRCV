@@ -38,7 +38,7 @@ public class VariableByte {
     }
 
     // preso una lista di variabili long restituisce un array contenente la loro rappesentazione in codifica variable byte
-    public byte[] fromArrayLongToVariableByte(ArrayList<Long> numbers) {
+    public static byte[] fromArrayLongToVariableByte(ArrayList<Long> numbers) {
         ByteBuffer buf = ByteBuffer.allocate(numbers.size() * (Long.SIZE / Byte.SIZE));
         for (Long number : numbers) {
             buf.put(fromLongToVariableByte(number));

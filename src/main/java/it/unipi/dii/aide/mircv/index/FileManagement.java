@@ -139,6 +139,13 @@ public class FileManagement {
                 writeByteToFile(ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(p.getDocID()).array(), "docII", 8);
                 writeByteToFile(ByteBuffer.allocate(Integer.SIZE / Byte.SIZE).putInt(p.getTermFrequency()).array(), "freqII", 4);
             }
+
+            // la lunghezza della posting list relativa ai documenti sara:
+            // lunghezza posting lit * byte occupati da un long
+            SPIMI.listTermDict.get(pos).setLengthPostingList_doc(term.getSize()*8);
+            // la lunghezza della posting list relativa alle frequenze sara:
+            // lunghezza posting lit * byte occupati da un int
+            SPIMI.listTermDict.get(pos).setLengthPostingList_freq(term.getSize()*4);
         }
         // Ora che sono sicura di aver aggiornato tutte le variabili necessarie posso scrivere il termine nel dizionario
         writeDictionaryToFile();

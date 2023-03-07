@@ -23,16 +23,19 @@ import java.util.PriorityQueue;
 
 public class Merger {
 
+    // array contenente, per ogni file temporaneo di dictionary, l'offset al quale siamo arrivati
     private static long[] offsetDict;
 
     private static int numTempFiles;
 
+    // array dei fileChannel relativi ai files temporanei
     private static ArrayList<FileChannel> arrayTempDict;
 
     private static ArrayList<FileChannel> arrayTempDocs;
 
     private static ArrayList<FileChannel> arrayTempFreqs;
 
+    // variabili contenenti i fileChannel dei nuovi files
     private static FileChannel finalIIDocs;
 
     private static FileChannel finalIIFreqs;
@@ -76,128 +79,147 @@ public class Merger {
 
         boolean firstIteration = true;
 
-        DictionaryElem nextD = new DictionaryElem();
+        // Dichiarazione variabili per la gestione del merger
+        DictionaryElem currentD = new DictionaryElem();
         DictionaryElem prevD = new DictionaryElem();
 
-        ArrayList<Integer> nextFreq= new ArrayList<>();
-        ArrayList<Integer> prevFreq= new ArrayList<>();
+        ArrayList<Integer> currentFreqList= new ArrayList<>();
+        ArrayList<Integer> prevFreqList= new ArrayList<>();
 
-        ArrayList<Integer> nextDoc= new ArrayList<>();
-        ArrayList<Integer> prevDoc= new ArrayList<>();
+        ArrayList<Long> currentDocList= new ArrayList<>();
+        ArrayList<Long> prevDocList= new ArrayList<>();
 
         MappedByteBuffer mappedByteBuffer;
 
         OrderedList ol;
 
+        // priority queue per mantenere in ordine alfabetico i termini prelevati dai vari blocchi
         PriorityQueue<OrderedList> pQueue
                 = new PriorityQueue<>(numTempFiles, new Comparator());
 
 
-        createNewFiles();
+        // Creazione dei file finali
+        FileManagement.createNewFiles();
+        // Assegnazione FileChannel
         setFinalFileChannels();
 
+        // Inserisco nella priority queue tutti i primi termini dei file dictionary temporanei
         for (int i=0; i < numTempFiles; i++) {
 
             mappedByteBuffer = arrayTempDict.get(i).map(FileChannel.MapMode.READ_ONLY, offsetDict[i], 20);
 
             if (mappedByteBuffer != null)
-                nextD.setTerm(StandardCharsets.UTF_8.decode(mappedByteBuffer).toString());
+                currentD.setTerm(StandardCharsets.UTF_8.decode(mappedByteBuffer).toString());
 
             // creo nuovo elemento della priority queue
-            ol = new OrderedList(nextD.getTerm(), i);
+            ol = new OrderedList(currentD.getTerm(), i);
             pQueue.add(ol);
         }
 
+        byte[] temp;
+        // ciclo fino a quando la priority queue non è vuota
+        // (cioè fino a che non ho visitato tutti i termini dei vari file temporanei)
         while (!pQueue.isEmpty()) {
-
-            byte[] temp;
-
-            ArrayList<Long> postingList = new ArrayList<>();
-            ArrayList<Integer> freqsList = new ArrayList<>();
 
             // prendo l'elemento minore
             ol = pQueue.poll();
 
+            // leggo 68 byte perchè sono i byte occupati da un elemento dictionary
             mappedByteBuffer = arrayTempDict.get(ol.getIndex()).map(FileChannel.MapMode.READ_ONLY, offsetDict[ol.getIndex()], 68);
 
-            nextD = FileManagement.convertToDictionaryObject(mappedByteBuffer);
+            currentD = FileManagement.convertToDictionaryObject(mappedByteBuffer);
 
             offsetDict[ol.getIndex()] += 68;
 
-            // scrivo in II_doc
             //vado a leggere nel file corretto contenente i documenti alla posizione offset
-
-            mappedByteBuffer = arrayTempDocs.get(ol.getIndex()).map(FileChannel.MapMode.READ_ONLY, nextD.getOffset_start_doc(), nextD.getLengthPostingList_doc());
+            mappedByteBuffer = arrayTempDocs.get(ol.getIndex()).map(FileChannel.MapMode.READ_ONLY, currentD.getOffset_start_doc(), currentD.getLengthPostingList_doc());
 
             if (mappedByteBuffer != null) {
 
                 // setto il nuovo offset di partenza
-                nextD.setOffset_start_doc(finalIIDocs.size());
+                currentD.setOffset_start_doc(finalIIDocs.size());
 
-                temp = new byte[mappedByteBuffer.remaining()];
-                mappedByteBuffer.get(temp);
+                // Creo l'array temporaneo di docID
+                for (int i = 1; i <= currentD.getLengthPostingList_doc() / 8; i++)
+                    currentDocList.add(mappedByteBuffer.getLong());
 
-                writeByteToFile(temp, "docII_new", nextD.getLengthPostingList_doc());
-
-                // TODO: Controllare se bisogna fare la compressione o meno
-                postingList.addAll(VariableByte.fromVariableByteToLong(temp));
+                mappedByteBuffer.rewind();
             }
 
-            mappedByteBuffer = arrayTempFreqs.get(ol.getIndex()).map(FileChannel.MapMode.READ_ONLY, nextD.getOffset_start_freq(), nextD.getLengthPostingList_freq());
+            //vado a leggere nel file corretto contenente le frequenze alla posizione offset
+            mappedByteBuffer = arrayTempFreqs.get(ol.getIndex()).map(FileChannel.MapMode.READ_ONLY, currentD.getOffset_start_freq(), currentD.getLengthPostingList_freq());
 
             if (mappedByteBuffer != null) {
 
-                temp = new byte[mappedByteBuffer.remaining()];
-                mappedByteBuffer.get(temp);
+                // setto il nuovo offset di partenza
+                currentD.setOffset_start_freq(finalIIFreqs.size());
 
-                // inserisco le frequenze dentro un array temporaneo per poi decomprimerlo tutto insieme
-                // caso in cui ho la stessa parola in più file temporanei
-                // TODO: Controllare se bisogna fare la compressione o meno
-                freqsList.addAll(Unary.fromUnaryToInt(temp));
+                // Creo l'array temporaneo di freq
+                for (int i = 1; i <= currentD.getLengthPostingList_doc() / 4; i++)
+                    currentFreqList.add(mappedByteBuffer.getInt());
+
+                mappedByteBuffer.rewind();
             }
 
-            if (nextD.getTerm().equals(prevD.getTerm()) || firstIteration) {
+            if (currentD.getTerm().equals(prevD.getTerm()) || firstIteration) {
 
-                //modifico new_d perchè all'interno di old_d ho lo stesso termine
-                // oppere perchè se sono nella prima iterazione old_d è vuoto
+                //modifico currentD perchè all'interno di prevD ho lo stesso termine
+                // oppere perchè se sono nella prima iterazione prevD è vuoto
 
-                nextD.incDocumentFrequency(prevD.getDocumentFrequency());
-                nextD.incCollectionFrequency(prevD.getCollectionFrequency());
-                nextD.incLengthPostingList_doc(prevD.getLengthPostingList_doc());
-                nextD.setOffset_start_doc(prevD.getOffset_start_doc());
-                prevFreq.addAll(nextFreq);
-                prevDoc.addAll(nextDoc);
+                currentD.incDocumentFrequency(prevD.getDocumentFrequency());
+                currentD.incCollectionFrequency(prevD.getCollectionFrequency());
+
+                currentD.incLengthPostingList_doc(prevD.getLengthPostingList_doc());
+                currentD.setOffset_start_doc(prevD.getOffset_start_doc());
+
+                currentD.incLengthPostingList_freq(prevD.getLengthPostingList_freq());
+                currentD.setOffset_start_freq(prevD.getOffset_start_freq());
+
+                prevFreqList.addAll(currentFreqList);
+                prevDocList.addAll(currentDocList);
+
                 firstIteration=false;
 
             } else {
-                // Il termine che ho dentro old_d non è presente all'interno di altri file temporanei
+                // Il termine che ho dentro prevD non è presente all'interno di altri file temporanei
                 // Quindi posso andarlo a scrivere all'interno dei dizionario finale
-                // prima comprimo tutto l'array delle frequenze e lo scrivo
+                // prima comprimo tutto
                 // TODO: verificare se serve la compressione (flag)
-                temp = Unary.fromIntToUnary(prevFreq);
+
+                // compressione array di frequenze
+                temp = Unary.fromIntToUnary(prevFreqList);
 
                 prevD.setOffset_start_freq(finalIIFreqs.size());
-                prevFreq.clear();
-                prevFreq = new ArrayList<>(nextFreq);
+                prevFreqList.clear();
+                prevFreqList = new ArrayList<>(currentFreqList);
 
-                writeByteToFile(temp, "freqII_new", temp.length);
+                FileManagement.writeByteToFile(temp, "freqII_new", temp.length);
 
+                // aggiorno la lunghezza della posting list compressa
                 prevD.setLengthPostingList_freq(temp.length);
 
+                // TODO: skipping
                 //doSkipping(old_d, old_list_doc);
 
+                //compressione array di docID
+                temp = VariableByte.fromArrayLongToVariableByte(prevDocList);
+                prevD.setOffset_start_freq(finalIIDocs.size());
+                prevDocList.clear();
+                prevDocList = new ArrayList<>(currentDocList);
 
-                prevDoc.clear();
-                prevDoc = new ArrayList<>(nextDoc);
+                FileManagement.writeByteToFile(temp, "docII_new", temp.length);
+
+                // aggiorno la lunghezza della posting list compressa
+                prevD.setLengthPostingList_doc(temp.length);
 
                 // posso andare a scrivere old_d in dictionary
                 writeOneDict(prevD, "new_dict");
             }
 
             // Modifico le variabili temporanee per la prossima iterazione
-            prevD= new DictionaryElem(nextD);
-            nextFreq.clear();
-            nextDoc.clear();
+            prevD= new DictionaryElem(currentD);
+            currentFreqList.clear();
+            currentDocList.clear();
 
             /* Inserisco all'interno della priority queue il prossimo termine presente nel file dictionary temporaneo
               della parola appena estratta come minore in ordine alfabetico*/
@@ -206,9 +228,9 @@ public class Merger {
                 mappedByteBuffer = arrayTempDict.get(ol.getIndex()).map(FileChannel.MapMode.READ_ONLY, offsetDict[ol.getIndex()], 20);
 
                 if (mappedByteBuffer != null)
-                    nextD.setTerm(StandardCharsets.UTF_8.decode(mappedByteBuffer).toString());
+                    currentD.setTerm(StandardCharsets.UTF_8.decode(mappedByteBuffer).toString());
 
-                ol = new OrderedList(nextD.getTerm(), ol.getIndex());
+                ol = new OrderedList(currentD.getTerm(), ol.getIndex());
                 pQueue.add(ol);
             }
         }
