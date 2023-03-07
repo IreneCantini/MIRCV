@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import static it.unipi.dii.aide.mircv.index.Util.deleteFile;
+import static it.unipi.dii.aide.mircv.index.Util.formatTime;
+
 public class SPIMI {
     /* HashMap <Term, Position> that maintains the position of the term within the two arrays */
     public static HashMap<String, Integer> positionTerm = new HashMap<>();
@@ -40,12 +43,12 @@ public class SPIMI {
      * Legge tutti i documenti e inserimento informazioni in strutture dati in memoria
      */
     public void invert() throws IOException, InterruptedException {
-
+        long start = System.currentTimeMillis();
         int freq;
         long docid=0;
         String docNo;
 
-        long MaxUsableMememory=Runtime.getRuntime().maxMemory()*80/100;
+        long MaxUsableMememory=Runtime.getRuntime().maxMemory()*5/100;
 
         //open and read collection
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("src/main/resources/collection_prova.tsv"), StandardCharsets.UTF_8));
@@ -53,7 +56,7 @@ public class SPIMI {
 
         while (line != null) {
 
-            ArrayList<String> tokens= new ArrayList<>();
+            ArrayList<String> tokens;
             tokens= TextPreprocesser.executeTextPreprocessing(line);
 
             totalLengthDoc+=tokens.size();
@@ -62,7 +65,7 @@ public class SPIMI {
             docNo=tokens.get(0);
             tokens.remove(0);
 
-            FileMenagement.writeOneDoc(new DocumentIndexElem(docid, docNo, tokens.size()));
+            FileManagement.writeOneDoc(new DocumentIndexElem(docid, docNo, tokens.size()));
 
             for (String t: tokens) {
                 freq = Collections.frequency(tokens, t);
@@ -79,7 +82,7 @@ public class SPIMI {
             }
 
             if(Runtime.getRuntime().totalMemory()>MaxUsableMememory) {
-                FileMenagement.insertOnDisk();
+                FileManagement.insertOnDisk();
                 System.out.println("SONO ARRIVATA AL 80%");
                 System.out.println("docID processato: "+docid);
 
@@ -92,8 +95,19 @@ public class SPIMI {
 
             line = reader.readLine();
         }
-        FileMenagement.insertOnDisk();
+        FileManagement.insertOnDisk();
 
+        long spimi = System.currentTimeMillis();
+        formatTime(start, spimi, "Spimi");
+
+        Merger m = new Merger();
+        m.mergeFiles();
+
+        long stop = System.currentTimeMillis();
+        formatTime(start, stop, "Merge");
+
+        deleteFile();
+        Util.printII(FileManagement.getDict(), FileManagement.getIIDoc(), FileManagement.getIIFreq(), null);
     }
 
     /**

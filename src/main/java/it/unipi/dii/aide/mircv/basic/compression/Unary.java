@@ -6,7 +6,7 @@ import java.util.BitSet;
 import static java.lang.Math.log;
 public class Unary {
     // converte da un intero alla sua rappresentazione in Unary
-    public byte[] fromIntToUnary(ArrayList<Integer> valuesToCompress){
+    public static byte[] fromIntToUnary(ArrayList<Integer> valuesToCompress){
         BitSet bs = new BitSet();
 
         int i = 0;
@@ -27,7 +27,7 @@ public class Unary {
     }
 
     // converte un array di byte contenente numeri rappresentati in unary in interi
-    public ArrayList<Integer> fromUnaryToInt(byte[] byteA) {
+    public static ArrayList<Integer> fromUnaryToInt(byte[] byteA) {
         BitSet b = BitSet.valueOf(byteA);
         ArrayList<Integer> arrayInt=new ArrayList<>();
 
