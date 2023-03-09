@@ -48,7 +48,7 @@ public class SPIMI {
         long docid=0;
         String docNo;
 
-        long MaxUsableMememory=Runtime.getRuntime().maxMemory()*5/100;
+        long MaxUsableMememory=Runtime.getRuntime().maxMemory()*80/100;
 
         //open and read collection
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("src/main/resources/collection_prova.tsv"), StandardCharsets.UTF_8));
@@ -108,6 +108,8 @@ public class SPIMI {
 
         deleteFile();
         Util.printII(FileManagement.getDict(), FileManagement.getIIDoc(), FileManagement.getIIFreq(), null);
+
+        //Util.printIINoCompression(FileManagement.getDicts().get(0), FileManagement.getDocs().get(0), FileManagement.getFreqs().get(0), null);
     }
 
     /**
@@ -118,9 +120,9 @@ public class SPIMI {
      */
     private void AddTerm(String t, long docId, int freq) {
 
-        this.listTerm.add(new PostingList(t, docId, freq));
-        this.listTermDict.add(new DictionaryElem(t, 1, freq));
-        this.positionTerm.put(t, this.listTerm.size()-1);
+        listTerm.add(new PostingList(t, docId, freq));
+        listTermDict.add(new DictionaryElem(t, 1, freq));
+        positionTerm.put(t, listTerm.size()-1);
     }
 
     /**

@@ -68,6 +68,7 @@ public class Merger {
 
     public static void mergeFiles() throws IOException {
 
+        System.out.println("file temp: "+numTempFiles);
         /**
          * 1. Creare un array di dimensione uguale al numero di file temporanei (es. per i file temporanei Dict)
          * 2. Creare un array di offset relativi a ogni file (es. per ogni file Dictionary teniamo un campo con l'offset
@@ -155,7 +156,7 @@ public class Merger {
                 currentD.setOffset_start_freq(finalIIFreqs.size());
 
                 // Creo l'array temporaneo di freq
-                for (int i = 1; i <= currentD.getLengthPostingList_doc() / 4; i++)
+                for (int i = 1; i <= currentD.getLengthPostingList_freq() / 4; i++)
                     currentFreqList.add(mappedByteBuffer.getInt());
 
                 mappedByteBuffer.rewind();
@@ -203,7 +204,7 @@ public class Merger {
 
                 //compressione array di docID
                 temp = VariableByte.fromArrayLongToVariableByte(prevDocList);
-                prevD.setOffset_start_freq(finalIIDocs.size());
+                prevD.setOffset_start_doc(finalIIDocs.size());
                 prevDocList.clear();
                 prevDocList = new ArrayList<>(currentDocList);
 
