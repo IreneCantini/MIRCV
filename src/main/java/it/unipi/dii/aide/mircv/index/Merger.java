@@ -68,15 +68,6 @@ public class Merger {
 
     public static void mergeFiles() throws IOException {
 
-        /**
-         * 1. Creare un array di dimensione uguale al numero di file temporanei (es. per i file temporanei Dict)
-         * 2. Creare un array di offset relativi a ogni file (es. per ogni file Dictionary teniamo un campo con l'offset
-         *    a cui siamo arrivati)
-         * 3. Array di fileChannels con i relativi
-         * 4. Fase di merge:
-         *      4.1
-         */
-
         boolean firstIteration = true;
 
         // Dichiarazione variabili per la gestione del merger
@@ -104,7 +95,7 @@ public class Merger {
         setFinalFileChannels();
 
         // Inserisco nella priority queue tutti i primi termini dei file dictionary temporanei
-        for (int i=0; i < numTempFiles; i++) {
+        for (int i = 0; i < numTempFiles; i++) {
 
             mappedByteBuffer = arrayTempDict.get(i).map(FileChannel.MapMode.READ_ONLY, offsetDict[i], 20);
 
@@ -124,12 +115,13 @@ public class Merger {
             // prendo l'elemento minore
             ol = pQueue.poll();
 
-            // leggo 68 byte perchè sono i byte occupati da un elemento dictionary
-            mappedByteBuffer = arrayTempDict.get(ol.getIndex()).map(FileChannel.MapMode.READ_ONLY, offsetDict[ol.getIndex()], 68);
+            // leggo 68 byte perchè sono i byte occupati da un elemento dictionary (68 con skipping)
+            mappedByteBuffer = arrayTempDict.get(ol.getIndex()).map(FileChannel.MapMode.READ_ONLY, offsetDict[ol.getIndex()], 56);
 
             currentD = FileManagement.convertToDictionaryObject(mappedByteBuffer);
 
-            offsetDict[ol.getIndex()] += 68;
+            // con skipping += 68
+            offsetDict[ol.getIndex()] += 56;
 
             //vado a leggere nel file corretto contenente i documenti alla posizione offset
             mappedByteBuffer = arrayTempDocs.get(ol.getIndex()).map(FileChannel.MapMode.READ_ONLY, currentD.getOffset_start_doc(), currentD.getLengthPostingList_doc());
@@ -155,7 +147,7 @@ public class Merger {
                 currentD.setOffset_start_freq(finalIIFreqs.size());
 
                 // Creo l'array temporaneo di freq
-                for (int i = 1; i <= currentD.getLengthPostingList_doc() / 4; i++)
+                for (int i = 1; i <= currentD.getLengthPostingList_freq() / 4; i++)
                     currentFreqList.add(mappedByteBuffer.getInt());
 
                 mappedByteBuffer.rewind();

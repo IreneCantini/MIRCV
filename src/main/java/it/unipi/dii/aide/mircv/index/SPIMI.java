@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import static it.unipi.dii.aide.mircv.index.Util.deleteFile;
-import static it.unipi.dii.aide.mircv.index.Util.formatTime;
+import static it.unipi.dii.aide.mircv.index.Util.*;
 
 public class SPIMI {
     /* HashMap <Term, Position> that maintains the position of the term within the two arrays */
@@ -81,16 +80,16 @@ public class SPIMI {
                     AddPost(positionTerm.get(t), docid, freq);
             }
 
-            if(Runtime.getRuntime().totalMemory()>MaxUsableMememory) {
-                FileManagement.insertOnDisk();
+            if (Runtime.getRuntime().totalMemory()>MaxUsableMememory) {
                 System.out.println("SONO ARRIVATA AL 80%");
-                System.out.println("docID processato: "+docid);
+                System.out.println("docID processato: " + docid);
+                FileManagement.insertOnDisk();
 
-                while (Runtime.getRuntime().totalMemory()>MaxUsableMememory)
-                {
+                while (Runtime.getRuntime().totalMemory()>MaxUsableMememory) {
                     System.gc();
                     Thread.sleep(100);
                 }
+                readFromTempFile();
             }
 
             line = reader.readLine();

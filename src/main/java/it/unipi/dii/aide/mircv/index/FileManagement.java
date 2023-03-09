@@ -130,7 +130,7 @@ public class FileManagement {
         int pos;
 
         for (PostingList term : SPIMI.listTerm) {
-            pos=SPIMI.positionTerm.get(term.getTerm());
+            pos = SPIMI.positionTerm.get(term.getTerm());
 
             SPIMI.listTermDict.get(pos).setOffset_start_doc(listFileChannelsDoc.get(listFileChannelsDoc.size()-1).size());
             SPIMI.listTermDict.get(pos).setOffset_start_freq(listFileChannelsFreq.get(listFileChannelsFreq.size()-1).size());
@@ -297,11 +297,13 @@ public class FileManagement {
         bytes = ByteBuffer.allocate(4).putInt(d.getLengthPostingList_freq()).array();
         writeByteToFile(bytes, where, 4);
 
+        /*
         bytes = ByteBuffer.allocate(8).putLong(d.getOffset_start_skipping()).array();
         writeByteToFile(bytes, where, 8);
 
         bytes = ByteBuffer.allocate(4).putInt(d.getLengthSkippingList()).array();
         writeByteToFile(bytes, where, 4);
+         */
 
     }
 
@@ -353,8 +355,8 @@ public class FileManagement {
         d.setLengthPostingList_doc(array.slice(40, 4).getInt());
         d.setOffset_start_freq(array.slice(44, 8).getLong());
         d.setLengthPostingList_freq(array.slice(52, 4).getInt());
-        d.setOffset_start_skipping(array.slice(56, 8).getLong());
-        d.setLengthSkippingList(array.slice(64, 4).getInt());
+        //d.setOffset_start_skipping(array.slice(56, 8).getLong());
+        //d.setLengthSkippingList(array.slice(64, 4).getInt());
 
         return d;
     }

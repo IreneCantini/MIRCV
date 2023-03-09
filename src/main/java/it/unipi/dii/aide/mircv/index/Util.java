@@ -11,8 +11,13 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumSet;
 
 public class Util {
     /**
@@ -33,6 +38,33 @@ public class Util {
         SPIMI.positionTerm.clear();
     }
 
+    public static void readFromTempFile() throws IOException {
+        DictionaryElem d = new DictionaryElem();
+
+        int conta = 0;
+
+        Path path = Path.of("src/main/resources/Dictionary_0.dat");
+        FileChannel dictFC = (FileChannel) Files.newByteChannel(path,
+                StandardOpenOption.WRITE,
+                StandardOpenOption.READ
+        );
+
+        long posLettura = 0;
+
+        while (posLettura < dictFC.size() && conta<5) {
+
+            conta++;
+            MappedByteBuffer mappedByteBuffer = dictFC.map(FileChannel.MapMode.READ_ONLY, posLettura, 20);
+
+            if (mappedByteBuffer != null)
+                d.setTerm(StandardCharsets.UTF_8.decode(mappedByteBuffer).toString());
+
+            System.out.println("Termine [" + "]: "  + d.getTerm());
+            posLettura += 56;
+
+        }
+    }
+
     public static void printII(FileChannel dict, FileChannel doc, FileChannel freq, FileChannel skip) throws IOException {
 
         DictionaryElem d = new DictionaryElem();
@@ -44,21 +76,23 @@ public class Util {
         while (posLettura < dict.size() && conta<100) {
 
             conta++;
-            MappedByteBuffer mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 20);
 
-            if (mappedByteBuffer != null) {
+            /* Print Term */
+            MappedByteBuffer mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 20);
+            if (mappedByteBuffer != null)
                 d.setTerm(StandardCharsets.UTF_8.decode(mappedByteBuffer).toString());
-            }
+
             System.out.println("Termine letto:" + d.getTerm());
             posLettura+=20; //scorro punto di lettura
 
+            /* Print Document Frequency */
             mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 4);
-
             if (mappedByteBuffer != null) {
                 d.setDocumentFrequency(mappedByteBuffer.getInt());
                 System.out.println("Document frequency:" + d.getDocumentFrequency());
             }
             posLettura+=4;
+
 
             if(d.getDocumentFrequency()>10)
             {
@@ -66,59 +100,56 @@ public class Util {
                 continue;
             }
 
+            /* Print Collection Frequency */
             mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 8);
-
             if (mappedByteBuffer != null) {
                 d.setCollectionFrequency(mappedByteBuffer.getLong());
                 System.out.println("Collection frequency:" + d.getCollectionFrequency());
             }
             posLettura+=8;
 
+            /* Set offset start docIDs */
             mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 8);
-
-            if (mappedByteBuffer != null) {
+            if (mappedByteBuffer != null)
                 d.setOffset_start_doc(mappedByteBuffer.getLong());
-            }
             posLettura+=8;
 
+            /* Set length posting list */
             mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 4);
-
-            if (mappedByteBuffer != null) {
+            if (mappedByteBuffer != null)
                 d.setLengthPostingList_doc(mappedByteBuffer.getInt());
-            }
             posLettura+=4;
 
-            mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 8);
 
-            if (mappedByteBuffer != null) {
+            /* Set offset start freqs */
+            mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 8);
+            if (mappedByteBuffer != null)
                 d.setOffset_start_freq(mappedByteBuffer.getLong());
-            }
             posLettura+=8;
 
+            /* Set length posting list freqs */
             mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 4);
-
-            if (mappedByteBuffer != null) {
+            if (mappedByteBuffer != null)
                 d.setLengthPostingList_freq(mappedByteBuffer.getInt());
-            }
             posLettura+=4;
 
+            /*
+            // Skipping
             mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 8);
-
             if (mappedByteBuffer != null) {
                 d.setOffset_start_skipping(mappedByteBuffer.getLong());
                 System.out.println("offset skipping: "+d.getOffset_start_skipping());
             }
             posLettura+=8;
 
-            mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 4);
 
-            if (mappedByteBuffer != null) {
+            mappedByteBuffer = dict.map(FileChannel.MapMode.READ_ONLY, posLettura, 4);
+            if (mappedByteBuffer != null)
                 d.setLengthSkippingList(mappedByteBuffer.getInt());
-            }
             posLettura+=4;
+             */
 
             mappedByteBuffer = doc.map(FileChannel.MapMode.READ_ONLY, d.getOffset_start_doc(), d.getLengthPostingList_doc());
-
             if (mappedByteBuffer != null) {
                 byte[] arr = new byte[mappedByteBuffer.remaining()];
                 mappedByteBuffer.get(arr);
@@ -127,7 +158,6 @@ public class Util {
             }
 
             mappedByteBuffer = freq.map(FileChannel.MapMode.READ_ONLY, d.getOffset_start_freq(), d.getLengthPostingList_freq());
-
             if (mappedByteBuffer != null) {
                 byte[] arr = new byte[mappedByteBuffer.remaining()];
                 mappedByteBuffer.get(arr);
