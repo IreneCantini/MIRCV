@@ -30,6 +30,8 @@ public class Merger {
 
         boolean firstIteration = true;
 
+
+
         PriorityQueue<OrderedList> pQueue = new PriorityQueue<>(SPIMI.block_number == 0 ? 1 : SPIMI.block_number, new Comparator());
 
         //create the final files and associate the file Channels to them
@@ -86,6 +88,9 @@ public class Merger {
                 previous_dict_elem.incDocidLen(current_dict_elem.getDocids_len());
                 previous_dict_elem.incFreqLen(current_dict_elem.getTf_len());
 
+                if(current_dict_elem.getMaxTf() > previous_dict_elem.getMaxTf())
+                    previous_dict_elem.setMaxTf(current_dict_elem.getMaxTf());
+
                 previous_pl.getPl().addAll(current_pl.getPl());
             }else{
                 //the term picked is different from the previous one, so it is possible to write the dictionary and the posting list to disk
@@ -99,7 +104,7 @@ public class Merger {
                 }
 
                 //update the maxTf field
-                previous_dict_elem.updateMaxTf(previous_pl);
+                //previous_dict_elem.updateMaxTf(previous_pl);
 
                 //write dictionary to final file
                 previous_dict_elem.writeDictionaryElemToDisk(RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel());
