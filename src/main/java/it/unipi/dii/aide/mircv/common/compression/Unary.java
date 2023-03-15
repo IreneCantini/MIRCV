@@ -1,9 +1,8 @@
-package it.unipi.dii.aide.mircv.basic.compression;
+package it.unipi.dii.aide.mircv.common.compression;
 
 import java.util.ArrayList;
 import java.util.BitSet;
 
-import static java.lang.Math.log;
 public class Unary {
     // converte da un intero alla sua rappresentazione in Unary
     public static byte[] fromIntToUnary(ArrayList<Integer> valuesToCompress){

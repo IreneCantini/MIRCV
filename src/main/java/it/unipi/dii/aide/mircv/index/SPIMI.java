@@ -1,7 +1,7 @@
 package it.unipi.dii.aide.mircv.index;
 
-import it.unipi.dii.aide.mircv.basic.data_structures_management.*;
-import it.unipi.dii.aide.mircv.basic.text_preprocessing.TextPreprocesser;
+import it.unipi.dii.aide.mircv.common.data_structures.*;
+import it.unipi.dii.aide.mircv.common.text_preprocessing.TextPreprocesser;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -100,16 +100,19 @@ public class SPIMI {
         long spimi = System.currentTimeMillis();
         formatTime(start, spimi, "Spimi");
 
+        /*
         Merger m = new Merger();
         m.mergeFiles();
+
+         */
 
         long stop = System.currentTimeMillis();
         formatTime(start, stop, "Merge");
 
         deleteFile();
-        Util.printII(FileManagement.getDict(), FileManagement.getIIDoc(), FileManagement.getIIFreq(), null);
+        //Util.printII(FileManagement.getDict(), FileManagement.getIIDoc(), FileManagement.getIIFreq(), null);
 
-        //Util.printIINoCompression(FileManagement.getDicts().get(0), FileManagement.getDocs().get(0), FileManagement.getFreqs().get(0), null);
+        Util.printIINoCompression(FileManagement.tempFileChannelDict, FileManagement.tempFileChannelDoc, FileManagement.tempFileChannelFreq, null);
     }
 
     /**

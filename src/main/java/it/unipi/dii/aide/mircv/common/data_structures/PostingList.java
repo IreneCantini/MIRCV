@@ -1,5 +1,7 @@
-package it.unipi.dii.aide.mircv.basic.data_structures_management;
+package it.unipi.dii.aide.mircv.common.data_structures;
 
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.util.ArrayList;
 
 public class PostingList {
@@ -41,4 +43,22 @@ public class PostingList {
     }
 
     public int getSize(){return this.pl.size();}
+
+    public LongBuffer getListDocs(){
+        LongBuffer listDocs = LongBuffer.allocate(pl.size());
+        for (PostingListElem elem: pl){
+            listDocs.put(elem.getDocID());
+        }
+
+        return listDocs;
+    }
+
+    public IntBuffer getListFreqs(){
+        IntBuffer listFreq = IntBuffer.allocate(pl.size());
+        for (PostingListElem elem: pl){
+            listFreq.put(elem.getTermFrequency());
+        }
+
+        return listFreq;
+    }
 }

@@ -1,4 +1,4 @@
-package it.unipi.dii.aide.mircv.basic.data_structures_management;
+package it.unipi.dii.aide.mircv.common.data_structures;
 
 public class SkippingElem{
     private long docID; // Massimo DocId del blocco preso in considerazione

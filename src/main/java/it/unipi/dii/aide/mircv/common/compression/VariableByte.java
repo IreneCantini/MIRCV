@@ -1,4 +1,4 @@
-package it.unipi.dii.aide.mircv.basic.compression;
+package it.unipi.dii.aide.mircv.common.compression;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

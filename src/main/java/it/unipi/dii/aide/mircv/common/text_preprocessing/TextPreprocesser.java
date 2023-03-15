@@ -1,4 +1,4 @@
-package it.unipi.dii.aide.mircv.basic.text_preprocessing;
+package it.unipi.dii.aide.mircv.common.text_preprocessing;
 
 import org.tartarus.snowball.ext.PorterStemmer;
 

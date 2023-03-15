@@ -1,7 +1,4 @@
-package it.unipi.dii.aide.mircv.basic.data_structures_management;
-
-import java.nio.MappedByteBuffer;
-import java.nio.charset.StandardCharsets;
+package it.unipi.dii.aide.mircv.common.data_structures;
 
 public class DictionaryElem {
     private String term;

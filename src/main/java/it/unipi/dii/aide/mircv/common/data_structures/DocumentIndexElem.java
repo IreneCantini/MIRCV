@@ -1,4 +1,4 @@
-package it.unipi.dii.aide.mircv.basic.data_structures_management;
+package it.unipi.dii.aide.mircv.common.data_structures;
 
 import java.nio.MappedByteBuffer;
 import java.nio.charset.StandardCharsets;

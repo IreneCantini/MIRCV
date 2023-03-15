@@ -1,13 +1,13 @@
 package it.unipi.dii.aide.mircv.index;
 
-import it.unipi.dii.aide.mircv.basic.compression.Unary;
-import it.unipi.dii.aide.mircv.basic.compression.VariableByte;
-import it.unipi.dii.aide.mircv.basic.data_structures_management.DictionaryElem;
-import it.unipi.dii.aide.mircv.basic.data_structures_management.PostingList;
-import it.unipi.dii.aide.mircv.basic.data_structures_management.PostingListElem;
+import it.unipi.dii.aide.mircv.common.compression.Unary;
+import it.unipi.dii.aide.mircv.common.compression.VariableByte;
+import it.unipi.dii.aide.mircv.common.data_structures.DictionaryElem;
+import it.unipi.dii.aide.mircv.common.data_structures.PostingList;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -173,6 +173,7 @@ public class Util {
         System.out.println("size freq: "+freq.size());
     }
 
+    /*
     public static void printIINoCompression(FileChannel dict, FileChannel doc, FileChannel freq, FileChannel skip) throws IOException {
 
         DictionaryElem d = new DictionaryElem();
@@ -307,6 +308,168 @@ public class Util {
                 if(mappedByteBuffer != null){
                     System.out.println("docMin: "+mappedByteBuffer.getLong());
                 }
+            }*//*
+        }
+        System.out.println("size doc: "+doc.size());
+        System.out.println("size freq: "+freq.size());
+    }
+    */
+
+    public static void printIINoCompression(FileChannel dict, FileChannel doc, FileChannel freq, FileChannel skip) throws IOException {
+
+        DictionaryElem d = new DictionaryElem();
+
+        int conta = 0;
+
+        long posLettura = 0;
+
+        ByteBuffer mappedByteBuffer;
+
+        while (posLettura < dict.size() && conta<100) {
+
+            conta++;
+            mappedByteBuffer= ByteBuffer.allocate(20);
+            dict.position(posLettura);
+            dict.read(mappedByteBuffer);
+
+            d.setTerm(StandardCharsets.UTF_8.decode(mappedByteBuffer).toString());
+            mappedByteBuffer.clear();
+
+            System.out.println("Termine letto:" + d.getTerm());
+            posLettura+=20; //scorro punto di lettura
+
+            mappedByteBuffer=ByteBuffer.allocate(4);
+            dict.position(posLettura);
+            dict.read(mappedByteBuffer);
+
+            d.setDocumentFrequency(mappedByteBuffer.getInt());
+            System.out.println("Document frequency:" + d.getDocumentFrequency());
+            mappedByteBuffer.clear();
+
+            posLettura+=4;
+
+            mappedByteBuffer=ByteBuffer.allocate(8);
+            dict.position(posLettura);
+            dict.read(mappedByteBuffer);
+
+            d.setCollectionFrequency(mappedByteBuffer.getLong());
+            System.out.println("Collection frequency:" + d.getCollectionFrequency());
+            mappedByteBuffer.clear();
+
+            posLettura+=8;
+
+            mappedByteBuffer=ByteBuffer.allocate(8);
+            dict.position(posLettura);
+            dict.read(mappedByteBuffer);
+
+            d.setOffset_start_doc(mappedByteBuffer.getLong());
+            mappedByteBuffer.clear();
+
+            posLettura+=8;
+
+            mappedByteBuffer=ByteBuffer.allocate(4);
+            dict.position(posLettura);
+            dict.read(mappedByteBuffer);
+
+            d.setLengthPostingList_doc(mappedByteBuffer.getInt());
+            mappedByteBuffer.clear();
+
+            posLettura+=4;
+
+            mappedByteBuffer=ByteBuffer.allocate(8);
+            dict.position(posLettura);
+            dict.read(mappedByteBuffer);
+
+            d.setOffset_start_freq(mappedByteBuffer.getLong());
+            mappedByteBuffer.clear();
+
+            posLettura+=8;
+
+            mappedByteBuffer=ByteBuffer.allocate(4);
+            dict.position(posLettura);
+            dict.read(mappedByteBuffer);
+
+            d.setLengthPostingList_freq(mappedByteBuffer.getInt());
+            mappedByteBuffer.clear();
+
+            posLettura+=4;
+
+            mappedByteBuffer=ByteBuffer.allocate(8);
+            dict.position(posLettura);
+            dict.read(mappedByteBuffer);
+
+            d.setOffset_start_skipping(mappedByteBuffer.getLong());
+            System.out.println("offset skipping: "+d.getOffset_start_skipping());
+            mappedByteBuffer.clear();
+
+            posLettura+=8;
+
+            mappedByteBuffer=ByteBuffer.allocate(4);
+            dict.position(posLettura);
+            dict.read(mappedByteBuffer);
+
+            d.setLengthSkippingList(mappedByteBuffer.getInt());
+
+            posLettura+=4;
+
+            mappedByteBuffer=ByteBuffer.allocate(d.getLengthPostingList_doc());
+            doc.position(d.getOffset_start_doc());
+            doc.read(mappedByteBuffer);
+
+
+            System.out.print("docII: [");
+
+            // Creo l'array temporaneo di docID
+            for (int i = 1; i <= d.getLengthPostingList_doc() / 8; i++)
+                System.out.print(mappedByteBuffer.getLong() +", ");
+
+            System.out.println("]");
+
+            mappedByteBuffer.clear();
+
+            mappedByteBuffer=ByteBuffer.allocate(d.getLengthPostingList_freq());
+            doc.position(d.getOffset_start_freq());
+            doc.read(mappedByteBuffer);
+
+            System.out.print("freqII: [");
+            // Creo l'array temporaneo di freq
+            for (int i = 1; i <= d.getLengthPostingList_freq() / 4; i++)
+                System.out.print(mappedByteBuffer.getInt()+ ", ");
+            System.out.println("]");
+
+            mappedByteBuffer.clear();
+
+        /*
+            if(d.getTerm().equals("2                   ")){
+                System.out.println("trovato 1");
+                mappedByteBuffer = skip.map(FileChannel.MapMode.READ_ONLY, d.getOffset_start_skipping(), 8);
+                if(mappedByteBuffer != null){
+                    System.out.println("docMin: "+mappedByteBuffer.getLong());
+                }
+                System.out.println("lenSkippingList: "+d.getLengthSkippingList());
+                long posLettura2=8;
+                while (posLettura2<d.getLengthSkippingList()){
+                    mappedByteBuffer = skip.map(FileChannel.MapMode.READ_ONLY, d.getOffset_start_skipping()+posLettura2, 8);
+                    if(mappedByteBuffer != null){
+                        System.out.println("docSkip: "+mappedByteBuffer.getLong());
+                    }
+                    posLettura2+=8;
+
+                    mappedByteBuffer = skip.map(FileChannel.MapMode.READ_ONLY, d.getOffset_start_skipping()+ posLettura2, 4);
+                    if(mappedByteBuffer != null){
+                        System.out.println("LenBlocco: "+mappedByteBuffer.getInt());
+                    }
+
+                    posLettura2+=4;
+                }
+            }
+
+            if(d.getLenghtSkippingList()==8){
+                System.out.println("Ho solo il docid minimo");
+                mappedByteBuffer = skip.map(FileChannel.MapMode.READ_ONLY, d.getOffset_start_skipping(), d.getLenghtSkippingList());
+                if(mappedByteBuffer != null){
+                    System.out.println("docMin: "+mappedByteBuffer.getLong());
+                }
             }*/
         }
         System.out.println("size doc: "+doc.size());
@@ -324,7 +487,7 @@ public class Util {
     }
 
     public static void deleteFile() throws IOException, InterruptedException {
-
+/*
         for(int i = 0; i < FileManagement.getDicts().size(); i++) {
             FileManagement.getDicts().get(i).close();
             FileManagement.getDocs().get(i).close();
@@ -333,6 +496,8 @@ public class Util {
             deleteFile_utility("II_Doc_"+i);
             deleteFile_utility("II_Freq_"+i);
         }
+
+ */
     }
 
     private static void deleteFile_utility(String fileName) throws InterruptedException {
