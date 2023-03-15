@@ -1,17 +1,17 @@
 package it.unipi.dii.aide.mircv.common.text_preprocessing;
 
-import org.tartarus.snowball.ext.PorterStemmer;
+        import org.tartarus.snowball.ext.PorterStemmer;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+        import java.io.*;
+        import java.nio.charset.StandardCharsets;
+        import java.nio.file.Files;
+        import java.nio.file.Paths;
+        import java.util.ArrayList;
+        import java.util.List;
+        import java.util.regex.Matcher;
+        import java.util.regex.Pattern;
+        import java.util.stream.Collectors;
+        import java.util.stream.Stream;
 
 public class TextPreprocesser {
 
@@ -87,7 +87,7 @@ public class TextPreprocesser {
         return tokens;
     }
 
-    public static ArrayList<String> executeTextPreprocessing(String line) throws IOException {
+    public static ArrayList<String> executeTextPreprocessing(String line, boolean flag) throws IOException {
 
         ArrayList<String> tokens = new ArrayList<>();
 
@@ -98,10 +98,12 @@ public class TextPreprocesser {
         tokens = tokenizeLine(line);
 
         //remove stopwords (checking the flag)
-        tokens = removeStopwords(tokens);
+        if(flag == true)
+            tokens = removeStopwords(tokens);
 
         //perform stemming
-        tokens = stemmingToken(tokens);
+        if(flag == true)
+            tokens = stemmingToken(tokens);
 
         return tokens;
 
