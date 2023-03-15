@@ -1,148 +1,134 @@
 package it.unipi.dii.aide.mircv.index;
 
-import it.unipi.dii.aide.mircv.common.data_structures.*;
+import it.unipi.dii.aide.mircv.common.file_management.FileUtils;
 import it.unipi.dii.aide.mircv.common.text_preprocessing.TextPreprocesser;
+import it.unipi.dii.aide.mircv.common.data_structures.*;
+import it.unipi.dii.aide.mircv.index.utils.IndexUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 
-import static it.unipi.dii.aide.mircv.index.Util.deleteFile;
-import static it.unipi.dii.aide.mircv.index.Util.formatTime;
+import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.doc_raf;
+import static it.unipi.dii.aide.mircv.index.utils.IndexUtils.cleanMemory;
 
 public class SPIMI {
-    /* HashMap <Term, Position> that maintains the position of the term within the two arrays */
-    public static HashMap<String, Integer> positionTerm = new HashMap<>();
+    //counter of the blocks
+    public static int block_number = 0;
 
-    /* *** IN-MEMORY STRUCTURES DECLARATION *** */
+    //Dictionary in memory
+    public static HashMap<String, DictionaryElem> Dictionary_instance = new HashMap<>();
 
-    /* Array containing the posting lists for each term parsed in the current block */
-    public static ArrayList<PostingList> listTerm;
+    //List for maintaining the list of term sorted
+    public static ArrayList<String> termList = new ArrayList<>();
 
-    /* Array containing the information of the terms parsed in the current block */
-    public static ArrayList<DictionaryElem> listTermDict;
+    //Posting list of a term in memory
+    public static HashMap<String, PostingList> PostingLists_instance = new HashMap<>();
 
-
-    /*Variable maintaining the total document's length to compute the average*/
-    public double totalLengthDoc=0;
-
-    public SPIMI(){
-        listTerm=new ArrayList<>();
-        listTermDict= new ArrayList<>();
-        /*
-        listFileChannelsDict = new ArrayList<>();
-        listFileChannelsDoc = new ArrayList<>();
-        listFileChannelsFreq = new ArrayList<>();
-         */
-
-    }
-
-    /**
-     * Legge tutti i documenti e inserimento informazioni in strutture dati in memoria
-     */
-    public void invert() throws IOException, InterruptedException {
-        long start = System.currentTimeMillis();
-        int freq;
-        long docid=0;
+    public static void executeSPIMI(String path_collection, boolean mode) throws IOException, InterruptedException {
+        //docid counter
+        int docid = 0;
         String docNo;
+        DocumentIndexElem doc_elem;
 
-        long MaxUsableMememory=Runtime.getRuntime().maxMemory()*80/100;
+        FileUtils.createDocIndexFile();
+
+        long MaxUsableMemory = Runtime.getRuntime().maxMemory() * 2 / 100;
 
         //open and read collection
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("src/main/resources/collection_prova.tsv"), StandardCharsets.UTF_8));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path_collection), StandardCharsets.UTF_8));
         String line = reader.readLine();
 
         while (line != null) {
-
             ArrayList<String> tokens;
-            tokens= TextPreprocesser.executeTextPreprocessing(line);
-
-            totalLengthDoc+=tokens.size();
+            tokens = TextPreprocesser.executeTextPreprocessing(line, mode);
+            //System.out.println(tokens);
 
             docid = docid + 1;
             docNo=tokens.get(0);
             tokens.remove(0);
 
-            FileManagement.writeOneDoc(new DocumentIndexElem(docid, docNo, tokens.size()));
+            doc_elem = new DocumentIndexElem(docid, docNo, tokens.size());
+            doc_elem.writeDocIndexElemToDisk(doc_raf.getChannel());
 
-            for (String t: tokens) {
-                freq = Collections.frequency(tokens, t);
+            for (String term : tokens) {
                 //taglio il token a 20 caratteri
-                if (t.length()>20)
-                    t=t.substring(0,20);
+                if (term.length() > 20)
+                    term = term.substring(0, 20);
 
-                if (positionTerm.get(t) == null)
-                    //il termine non è presente
-                    AddTerm(t,docid, freq);
-                else
-                    //il termine è già presente quindi devo solo aggiungere un posting
-                    AddPost(positionTerm.get(t), docid, freq);
-            }
+                //check if the term is already inside the dictionary
+                if (!Dictionary_instance.containsKey(term)) {
+                    //add the new term to the list of terms of the Dictionary
+                    termList.add(term);
 
-            if(Runtime.getRuntime().totalMemory()>MaxUsableMememory) {
-                FileManagement.insertOnDisk();
-                System.out.println("SONO ARRIVATA AL 80%");
-                System.out.println("docID processato: "+docid);
+                    //add the new term inside the dictionary in memory
+                    Dictionary_instance.put(term, new DictionaryElem(term, 1, Collections.frequency(tokens, term)));
 
-                while (Runtime.getRuntime().totalMemory()>MaxUsableMememory)
-                {
-                    System.gc();
-                    Thread.sleep(100);
+                    //create posting list of the term
+                    PostingLists_instance.put(term, new PostingList(term, new Posting(docid, Collections.frequency(tokens, term))));
+                } else {
+                    ArrayList<Posting> p = PostingLists_instance.get(term).getPl();
+
+                    // check if the current term statistics for the document we are processing have been computed and if not calculate them
+                    if(p.get(p.size()-1).getDocID() != docid) {
+                        //term already exist in Dictionary, so it is necessary to update only the corresponding Dictionary Entry
+                        Dictionary_instance.get(term).incCf(Collections.frequency(tokens, term));
+                        Dictionary_instance.get(term).incDf();
+
+                        //retrieve the posting list of the term and adding a posting
+                        PostingLists_instance.get(term).addPosting(new Posting(docid,Collections.frequency(tokens, term)));
+                    }
                 }
             }
 
+            if (Runtime.getRuntime().totalMemory() > MaxUsableMemory) {
+                System.out.printf("UTILIZZO MASSIMO CONSENTITO DELLA MEMORIA RAGGIUNTO: SCRITURA DEL BLOCCO '%d' SU DISCO IN CORSO\n", block_number);
+
+                //write block to disk
+                if(!IndexUtils.writeBlockToDisk(termList, Dictionary_instance, PostingLists_instance, block_number)){
+                    System.out.printf("ERRORE: scrittura del blocco %d su disco non andata a buon fine\n", block_number);
+                    break;
+                }else{
+                    System.out.printf("Scrittura del blocco '%d' completata\n", block_number);
+                    block_number++;
+                }
+
+                //clear memory used for the elaboration of previous block
+                cleanMemory();
+
+                System.gc();
+
+                while (Runtime.getRuntime().totalMemory() > MaxUsableMemory) {
+                    Thread.sleep(100);
+                }
+
+                System.out.printf("Pulizia della memoria completata, procedo con il nuovo blocco '%d'\n", block_number);
+            }
             line = reader.readLine();
         }
-        FileManagement.insertOnDisk();
 
-        long spimi = System.currentTimeMillis();
-        formatTime(start, spimi, "Spimi");
+        //write the final block in memory
+        System.out.println("Procedo con la scrittura su disco del blocco finale in memoria");
 
-        /*
-        Merger m = new Merger();
-        m.mergeFiles();
-
-         */
-
-        long stop = System.currentTimeMillis();
-        formatTime(start, stop, "Merge");
-
-        deleteFile();
-        //Util.printII(FileManagement.getDict(), FileManagement.getIIDoc(), FileManagement.getIIFreq(), null);
-
-        Util.printIINoCompression(FileManagement.tempFileChannelDict, FileManagement.tempFileChannelDoc, FileManagement.tempFileChannelFreq, null);
-    }
-
-    /**
-     * Aggiungo termine nuovo all'array di posting list e all'array del dizionario
-     * @param t
-     * @param docId
-     * @param freq
-     */
-    private void AddTerm(String t, long docId, int freq) {
-
-        listTerm.add(new PostingList(t, docId, freq));
-        listTermDict.add(new DictionaryElem(t, 1, freq));
-        positionTerm.put(t, listTerm.size()-1);
-    }
-
-    /**
-     * Aggiunge un nuovo posting al termine già presente nell'array
-     * @param pos
-     * @param docid
-     * @param freq
-     */
-    public void AddPost(Integer pos, long docid, Integer freq) {
-
-        PostingList postingList_T = listTerm.get(pos);
-
-        //se è uguale significa che era già presente in questo documento e ho già salvato tutte le informazioni
-        if (postingList_T.getLastElement() != docid) {
-            listTerm.get(pos).addPosting(docid, freq);
-            listTermDict.get(pos).incCollectionFrequency(freq);
-            listTermDict.get(pos).incDocumentFrequency();
+        if(!IndexUtils.writeBlockToDisk(termList, Dictionary_instance, PostingLists_instance, block_number)){
+            System.out.print("ERRORE: scrittura del blocco finale su disco non andata a buon fine\n");
+        }else{
+            System.out.printf("Scrittura del blocco finale %d completata\n", block_number);
         }
+
+        //merge phase
+        System.out.println("OPERAZIONE DI MERGING IN CORSO");
+        long start = System.currentTimeMillis();
+
+        Merger.executeMerge(true);
+
+        System.out.println("OPERAZIONE DI MERGING COMPLETATA");
+
+        long end = System.currentTimeMillis() - start;
+        long time = (end/1000)/60;
+        System.out.println("Merge operation executed in: " + time + " minutes");
     }
 }
