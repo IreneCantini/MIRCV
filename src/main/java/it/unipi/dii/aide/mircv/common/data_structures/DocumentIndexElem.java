@@ -1,11 +1,17 @@
 package it.unipi.dii.aide.mircv.common.data_structures;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
+import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.doc_raf;
+
 public class DocumentIndexElem {
-    private long docId;
     private String docNo;
+    private long docId;
     private long length;
 
     public DocumentIndexElem(){
@@ -49,15 +55,81 @@ public class DocumentIndexElem {
         return length;
     }
 
-    /**
-     * Convertitore da bytes del file Dictionary a un oggetto di tipo Dictionary
-     * @param array
-     * @return
-     */
-    public void convertToDocumentObject(MappedByteBuffer array) {
+    /*public void writeDocIndexElemToDisk() throws IOException {
 
-        this.docId= array.slice(0, 8).getLong();
-        this.docNo=StandardCharsets.UTF_8.decode(array.slice(8,20)).toString();
-        this.length=array.slice(28, 8).getLong();
+        MappedByteBuffer docIndexBuffer;
+
+        docIndexBuffer = doc_raf.getChannel().map(FileChannel.MapMode.READ_WRITE, doc_raf.getChannel().size(), 36);
+
+
+        if(docIndexBuffer != null){
+            //write the document index elem fields into the corresponding file
+            CharBuffer charBuffer = CharBuffer.allocate(20);
+            for(int i = 0; i<this.docNo.length(); i++)
+                charBuffer.put(i, this.docNo.charAt(i));
+
+            docIndexBuffer.put(StandardCharsets.UTF_8.encode(charBuffer));
+            docIndexBuffer.putLong(this.docId);
+            docIndexBuffer.putLong(this.length);
+        }
+    }*/
+
+    public void writeDocIndexElemToDisk(FileChannel docIndexFileChannel) throws IOException {
+        ByteBuffer docIndexBuffer = ByteBuffer.allocate(36);
+        docIndexFileChannel.position(docIndexFileChannel.size());
+
+        CharBuffer charBuffer = CharBuffer.allocate(20);
+        for(int i = 0; i<this.docNo.length(); i++)
+            charBuffer.put(i, this.docNo.charAt(i));
+
+        //write the dictionary elem fields into file
+        docIndexBuffer.put(StandardCharsets.UTF_8.encode(charBuffer));
+        docIndexBuffer.putLong(this.docId);
+        docIndexBuffer.putLong(this.length);
+
+        docIndexBuffer = ByteBuffer.wrap(docIndexBuffer.array());
+
+        while(docIndexBuffer.hasRemaining()) {
+            docIndexFileChannel.write(docIndexBuffer);
+        }
+    }
+
+    /*public void readDocumentIndexElemFromDisk(int position) throws IOException {
+        MappedByteBuffer buffer;
+
+        buffer = doc_raf.getChannel().map(FileChannel.MapMode.READ_ONLY,position, 20);
+
+        if(buffer!=null){
+            CharBuffer charBuffer = StandardCharsets.UTF_8.decode(buffer);
+            String[] term = charBuffer.toString().split("\0");
+            this.setDocNo(term[0]);
+        }
+
+        buffer = doc_raf.getChannel().map(FileChannel.MapMode.READ_ONLY, position + 20, 16);
+
+        this.setDocId(buffer.getLong());
+        this.setLength(buffer.getLong());
+    }*/
+
+    public void readDocumentIndexElemFromDisk(int start_position, FileChannel docIndexFileChannel) throws IOException {
+        ByteBuffer docIndexBuffer = ByteBuffer.allocate(20);
+
+        docIndexFileChannel.position(start_position);
+
+        while (docIndexBuffer.hasRemaining()){
+            docIndexFileChannel.read(docIndexBuffer);
+        }
+
+        this.setDocNo(new String(docIndexBuffer.array(), StandardCharsets.UTF_8).trim());
+
+        docIndexBuffer = ByteBuffer.allocate(16);
+
+        while (docIndexBuffer.hasRemaining()){
+            docIndexFileChannel.read(docIndexBuffer);
+        }
+
+        docIndexBuffer.rewind();
+        this.setDocId(docIndexBuffer.getLong());
+        this.setLength(docIndexBuffer.getLong());
     }
 }

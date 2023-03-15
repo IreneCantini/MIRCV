@@ -1,135 +1,285 @@
 package it.unipi.dii.aide.mircv.common.data_structures;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+
 public class DictionaryElem {
     private String term;
-    private int documentFrequency; //in quanti documenti compare il termine
-    private long collectionFrequency;   //quante volte compare nella collection
-    private long offset_start_doc; //offset di dove inizia la postinglist dei docID
-    private int lengthPostingList_doc; //grandezza della postinglist dei docID
-    private long offset_start_freq; //offset di dove inizia la postinglist delle frequenze
-    private int lengthPostingList_freq; //grandezza della la postinglist delle frequenze
 
-    private long offset_start_skipping; //offset di dove inizia la lista di skipping
+    //number of documents in which the term appears at least once
+    private int df;
 
-    private int lengthSkippingList; //grandezza della skipping list
+    //number of times the term appears in the collection
+    private int cf;
 
+    //offset of the docids posting list
+    private long offset_docids;
+
+    //lenght of the docids posting list
+    private int docids_len;
+
+    //offset of the term frequencies posting list
+    private long offset_tf;
+
+    //length of the term frequencies posting list c
+    private int tf_len;
+
+    //maximum term frequency of the term
+    private int maxTf;
+
+    //default constructor (empty element)
     public DictionaryElem(){
         this.term = " ";
-        this.documentFrequency = 0;
-        this.collectionFrequency = 0;
-        this.offset_start_doc = 0;
-        this.lengthPostingList_doc = 0;
-        this.offset_start_freq = 0;
-        this.lengthPostingList_freq =0;
-        this.offset_start_skipping = 0;
-        this.lengthSkippingList = 0;
+        this.df = 0;
+        this.cf = 0;
+        this.offset_docids = 0;
+        this.docids_len = 0;
+        this.offset_tf = 0;
+        this.tf_len = 0;
+        this.maxTf = 0;
     }
 
-    public DictionaryElem(String term, int docFreq, long collFreq) {
-        int diffLength=20-term.length();
-        if(diffLength!=0){
-            // andiamo a concatenare " " per arrivare alla dimensione fissa di 20 caratteri
-            term = term + " ".repeat(Math.max(0, diffLength));
-        }
-        this.term=term;
-        this.documentFrequency=docFreq;
-        this.collectionFrequency=collFreq;
-        this.offset_start_doc = 0;
-        this.lengthPostingList_doc = 0;
-        this.offset_start_freq = 0;
-        this.lengthPostingList_freq =0;
+    //constructor for the vocabulary entry for the term passed as parameter
+    public DictionaryElem(String term) {
+        this.term = term;
+        this.df = 0;
+        this.cf = 0;
+        this.offset_docids = 0;
+        this.docids_len = 0;
+        this.offset_tf = 0;
+        this.tf_len = 0;
+        this.maxTf = 0;
     }
 
-    public DictionaryElem(DictionaryElem d){
-        this.term = d.getTerm();
-        this.documentFrequency = d.getDocumentFrequency();
-        this.collectionFrequency = d.getCollectionFrequency();
-        this.offset_start_doc = d.getOffset_start_doc();
-        this.lengthPostingList_doc = d.getLengthPostingList_doc();
-        this.offset_start_freq = d.getOffset_start_freq();
-        this.lengthPostingList_freq =d.getLengthPostingList_freq();
+    public DictionaryElem(String term, int df, int cf) {
+        this.term = term;
+        this.df = df;
+        this.cf = cf;
+        this.offset_docids = 0;
+        this.docids_len = 0;
+        this.offset_tf = 0;
+        this.tf_len = 0;
+        this.maxTf = 0;
     }
-
-    public void setCollectionFrequency(long f) {collectionFrequency = f;}
-    public long getCollectionFrequency() {return this.collectionFrequency;}
-
-    public void setDocumentFrequency(int f) {this.documentFrequency = f;}
-    public int getDocumentFrequency() {return this.documentFrequency;}
 
     public void setTerm(String term) {
-        int diffLength=20-term.length();
-        if(diffLength!=0){
-            // andiamo a concatenare " " per arrivare alla dimensione fissa di 20 caratteri
-            term = term + " ".repeat(Math.max(0, diffLength));
-        }
-
         this.term = term;
     }
-    public String getTerm() {return this.term;}
 
-    public void setOffset_start_freq(long offset_freq) {
-        this.offset_start_freq = offset_freq;
+    public void setDf(int df) {
+        this.df = df;
     }
 
-    public void setOffset_start_doc(long offset_doc) {
-        this.offset_start_doc = offset_doc;
+    public void setCf(int cf) {
+        this.cf = cf;
     }
 
-    public void setLengthPostingList_freq(int length) {
-        this.lengthPostingList_freq = length;
+    public void setOffset_docids(long offset_docids) {
+        this.offset_docids = offset_docids;
     }
 
-    public void setLengthPostingList_doc(int length) {
-        this.lengthPostingList_doc = length;
+    public void setDocids_len(int docids_len) {
+        this.docids_len = docids_len;
     }
 
-
-
-    public void incDocumentFrequency(){
-        this.documentFrequency++;
-    }
-    public void incDocumentFrequency(int f){
-        this.documentFrequency+=f;
+    public void setOffset_tf(long offset_tf) {
+        this.offset_tf = offset_tf;
     }
 
-    public void incCollectionFrequency(long f){
-        this.collectionFrequency+=f;
+    public void setTf_len(int tf_len) {
+        this.tf_len = tf_len;
     }
 
-    public long getOffset_start_doc() {
-        return offset_start_doc;
+    public String getTerm() {
+        return term;
     }
 
-    public long getOffset_start_freq() {
-        return offset_start_freq;
+    public int getDf() {
+        return df;
     }
 
-    public int getLengthPostingList_doc() {
-        return lengthPostingList_doc;
+    public int getCf() {
+        return cf;
     }
 
-    public int getLengthPostingList_freq() {
-        return lengthPostingList_freq;
+    public long getOffset_docids() {
+        return offset_docids;
     }
 
-    public void incLengthPostingList_doc(int newlength) { this.lengthPostingList_doc+=newlength;}
-    public void incLengthPostingList_freq(int newlength) { this.lengthPostingList_freq+=newlength;}
-
-    public long getOffset_start_skipping() {
-        return offset_start_skipping;
+    public int getDocids_len() {
+        return docids_len;
     }
 
-    public int getLengthSkippingList() {
-        return lengthSkippingList;
+    public long getOffset_tf() {
+        return offset_tf;
     }
 
-    public void setOffset_start_skipping(long offset_start_skipping) {
-        this.offset_start_skipping = offset_start_skipping;
+    public int getTf_len() {
+        return tf_len;
     }
 
-    public void setLengthSkippingList(int lengthSkippingList) {
-        this.lengthSkippingList = lengthSkippingList;
+    public void incDf(){
+        this.df++;
     }
 
+    public void incDf(int n){
+        this.df = this.df + n;
+    }
 
+    public void incCf(int n){
+        this.cf = this.cf + n;
+    }
+
+    public void incDocidLen(){
+        this.docids_len++;
+    }
+
+    public void incDocidLen(int n){
+        this.docids_len = this.docids_len + n;
+    }
+
+    public void incFreqLen(){
+        this.tf_len++;
+    }
+
+    public void incFreqLen(int n){
+        this.tf_len = this.tf_len + n;
+    }
+
+    public void updateMaxTf(PostingList list) {
+
+        //for each element of the intermediate posting list
+        for (Posting posting : list.getPl()) {
+
+            // update the max term frequency
+            if (posting.getTermFrequency() > this.maxTf)
+                this.maxTf = posting.getTermFrequency();
+        }
+    }
+
+    public void setMaxTf(int maxTf) { this.maxTf = maxTf; }
+
+    public int getMaxTf() { return this.maxTf; }
+
+    public void printVocabularyEntry(){
+        System.out.printf("Document Frequency: %d\nCollection Frequency: %d\nMax Term Frequency: %d\nPostingList docid lenght: %d\nPostingList freq: %d\n", this.getDf(), this.getCf(),this.getMaxTf(), this.getDocids_len(), this.getTf_len());
+    }
+
+    /*public boolean writeDictionaryElemToDisk(FileChannel dictFchannel) throws IOException {
+        MappedByteBuffer dictBuffer;
+
+        try {
+            dictBuffer = dictFchannel.map(FileChannel.MapMode.READ_WRITE, dictFchannel.size(), 56);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if(dictBuffer == null)
+            return false;
+
+        //convert String term into charBuffer for inserting it into file
+        CharBuffer charBuffer = CharBuffer.allocate(20);
+        for(int i = 0; i<this.term.length(); i++)
+            charBuffer.put(i, this.term.charAt(i));
+
+        //write the dictionary elem fields into file
+        dictBuffer.put(StandardCharsets.UTF_8.encode(charBuffer));
+        dictBuffer.putInt(this.df);
+        dictBuffer.putInt(this.cf);
+        dictBuffer.putLong(this.offset_docids);
+        dictBuffer.putInt(this.docids_len);
+        dictBuffer.putLong(this.offset_tf);
+        dictBuffer.putInt(this.tf_len);
+        dictBuffer.putInt(this.getMaxTf());
+
+        return true;
+    } */
+
+    /*public boolean readDictionaryElemFromDisk(long position, FileChannel dictFchannel) throws IOException {
+
+        MappedByteBuffer buffer;
+        try {
+            buffer = dictFchannel.map(FileChannel.MapMode.READ_ONLY, position, 20);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (buffer == null)
+            return false;
+
+        CharBuffer charBuffer = StandardCharsets.UTF_8.decode(buffer);
+        String[] term = charBuffer.toString().split("\0");
+        this.setTerm(term[0]);
+
+        buffer = dictFchannel.map(FileChannel.MapMode.READ_ONLY, position + 20, 36);
+
+        if (buffer == null)
+            return false;
+
+        this.setDf(buffer.getInt());
+        this.setCf(buffer.getInt());
+        this.setOffset_docids(buffer.getLong());
+        this.setDocids_len(buffer.getInt());
+        this.setOffset_tf(buffer.getLong());
+        this.setTf_len(buffer.getInt());
+        this.setMaxTf(buffer.getInt());
+
+        return true;
+    } */
+
+    public void writeDictionaryElemToDisk(FileChannel dictFileChannel) throws IOException {
+        ByteBuffer buffer = ByteBuffer.allocate(56);
+        dictFileChannel.position(dictFileChannel.size());
+
+        CharBuffer charBuffer = CharBuffer.allocate(20);
+        for(int i = 0; i<this.term.length(); i++)
+            charBuffer.put(i, this.term.charAt(i));
+
+        //write the dictionary elem fields into file
+        buffer.put(StandardCharsets.UTF_8.encode(charBuffer));
+        buffer.putInt(this.df);
+        buffer.putInt(this.cf);
+        buffer.putLong(this.offset_docids);
+        buffer.putInt(this.docids_len);
+        buffer.putLong(this.offset_tf);
+        buffer.putInt(this.tf_len);
+        buffer.putInt(this.getMaxTf());
+
+        buffer = ByteBuffer.wrap(buffer.array());
+
+        while(buffer.hasRemaining()) {
+            dictFileChannel.write(buffer);
+        }
+    }
+
+    public void readDictionaryElemFromDisk(long start_position, FileChannel dictFchannel) throws IOException {
+        ByteBuffer buffer = ByteBuffer.allocate(20);
+
+        dictFchannel.position(start_position);
+
+        while (buffer.hasRemaining()){
+            dictFchannel.read(buffer);
+        }
+
+        this.setTerm(new String(buffer.array(), StandardCharsets.UTF_8).trim());
+
+        buffer = ByteBuffer.allocate(36);
+
+        while (buffer.hasRemaining()){
+            dictFchannel.read(buffer);
+        }
+
+        buffer.rewind();
+        this.setDf(buffer.getInt());
+        this.setCf(buffer.getInt());
+        this.setOffset_docids(buffer.getLong());
+        this.setDocids_len(buffer.getInt());
+        this.setOffset_tf(buffer.getLong());
+        this.setTf_len(buffer.getInt());
+        this.setMaxTf(buffer.getInt());
+    }
 }
