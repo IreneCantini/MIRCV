@@ -1,5 +1,4 @@
 package it.unipi.dii.aide.mircv.common.data_structures.min_heap;
-
 public class OrderedList {
 
     String term;
