@@ -15,16 +15,18 @@ import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
 
 public class Indexer {
     public static void main(String[] args) throws IOException, InterruptedException {
+
+        /*
         long start = System.currentTimeMillis();
-        SPIMI.executeSPIMI("src/main/resources/collection_prova.tsv", true); //false: unfiltered, true: filtered
+        SPIMI.executeSPIMI("src/main/resources/collection.tsv", true); //false: unfiltered, true: filtered
         System.out.println("COSTRUZIONE INVERTED INDEX COMPLETATA");
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;
         System.out.println("Inverted Index built in: " + time + " minutes");
-
+*/
         IndexUtils.printInvertedIndex(true);
 
-        IndexUtils.printDocumentIndex();
+        //IndexUtils.printDocumentIndex();
 
        /* RandomAccessFile file = new RandomAccessFile(PATH_TO_VOCABULARY, "rw");
         DictionaryElem d_elem = new DictionaryElem("ciao", 3, 4);

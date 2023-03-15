@@ -95,8 +95,10 @@ public class PostingList {
         docsByteBuffer = ByteBuffer.wrap(docsByteBuffer.array());
         freqsByteBuffer = ByteBuffer.wrap(freqsByteBuffer.array());
 
-        while (docsByteBuffer.hasRemaining() && freqsByteBuffer.hasRemaining()) {
+        while (docsByteBuffer.hasRemaining()) {
             docidsFchannel.write(docsByteBuffer);
+        }
+        while (freqsByteBuffer.hasRemaining()) {
             freqsFchannel.write(freqsByteBuffer);
         }
     }
@@ -150,8 +152,10 @@ public class PostingList {
         docsByteBuffer = ByteBuffer.wrap(docidsCompressed);
         freqsByteBuffer = ByteBuffer.wrap(freqsCompressed);
 
-        while (docsByteBuffer.hasRemaining() && freqsByteBuffer.hasRemaining()) {
+        while (docsByteBuffer.hasRemaining()) {
             docidsFchannel.write(docsByteBuffer);
+        }
+        while (freqsByteBuffer.hasRemaining()) {
             freqsFchannel.write(freqsByteBuffer);
         }
 
@@ -197,8 +201,10 @@ public class PostingList {
         docidsFchannel.position(d_elem.getOffset_docids());
         freqsFchannel.position(d_elem.getOffset_tf());
 
-        while(docsByteBuffer.hasRemaining() && freqsByteBuffer.hasRemaining()) {
-            docidsFchannel.read(docsByteBuffer);
+        while(docsByteBuffer.hasRemaining()) {
+            freqsFchannel.read(freqsByteBuffer);
+        }
+        while(freqsByteBuffer.hasRemaining()) {
             freqsFchannel.read(freqsByteBuffer);
         }
 
@@ -207,6 +213,12 @@ public class PostingList {
 
         ArrayList<Long> docids = VariableByte.fromVariableByteToLong(docsByteBuffer.array());
         ArrayList<Integer> freqs = Unary.fromUnaryToInt(freqsByteBuffer.array());
+        if(docids.size()!=freqs.size())
+        {
+            System.out.println(d_elem.getTerm());
+            System.out.println(docids.size() + ", "+ freqs.size());
+        }
+
 
         Posting p;
 
@@ -241,8 +253,10 @@ public class PostingList {
         docidsFchannel.position(d_elem.getOffset_docids());
         freqsFchannel.position(d_elem.getOffset_tf());
 
-        while(docsByteBuffer.hasRemaining() && freqByteBuffer.hasRemaining()) {
+        while(docsByteBuffer.hasRemaining()) {
             docidsFchannel.read(docsByteBuffer);
+        }
+        while(freqByteBuffer.hasRemaining()) {
             freqsFchannel.read(freqByteBuffer);
         }
 

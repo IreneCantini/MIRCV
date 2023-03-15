@@ -36,7 +36,7 @@ public class SPIMI {
 
         FileUtils.createDocIndexFile();
 
-        long MaxUsableMemory = Runtime.getRuntime().maxMemory() * 2 / 100;
+        long MaxUsableMemory = Runtime.getRuntime().maxMemory() * 80 / 100;
 
         //open and read collection
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path_collection), StandardCharsets.UTF_8));

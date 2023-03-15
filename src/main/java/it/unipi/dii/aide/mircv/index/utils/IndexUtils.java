@@ -11,6 +11,7 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Objects;
 
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
 import static it.unipi.dii.aide.mircv.index.SPIMI.*;
@@ -46,8 +47,8 @@ public class IndexUtils {
         while (position < Files.size(Path.of(PATH_TO_VOCABULARY))) {
             d_elem = new DictionaryElem();
             d_elem.readDictionaryElemFromDisk(position, dictionaryFchannel);
-            System.out.printf("Term: '%s'\n", d_elem.getTerm());
-            d_elem.printVocabularyEntry();
+            //System.out.printf("Term: '%s'\n", d_elem.getTerm());
+            //d_elem.printVocabularyEntry();
 
             pl = new PostingList(d_elem.getTerm());
 
@@ -57,7 +58,15 @@ public class IndexUtils {
             else
                 pl.readPostingListFromDisk(d_elem, docidsFchannel, freqsFchannel);
 
-            pl.printPostingList();
+
+            if(Objects.equals(pl.getTerm(), "amid"))
+            {
+                System.out.println("dentro if");
+                System.out.printf("Term: '%s'\n", d_elem.getTerm());
+                d_elem.printVocabularyEntry();
+                pl.printPostingList();
+            }
+
             position += 56;
         }
     }
