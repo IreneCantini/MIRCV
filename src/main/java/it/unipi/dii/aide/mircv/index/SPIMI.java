@@ -46,7 +46,6 @@ public class SPIMI {
         while (line != null) {
             ArrayList<String> tokens;
             tokens = TextPreprocesser.executeTextPreprocessing(line, mode);
-            //System.out.println(tokens);
 
             docid = docid + 1;
             docNo=tokens.get(0);
