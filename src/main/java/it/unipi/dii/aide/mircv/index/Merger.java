@@ -103,9 +103,6 @@ public class Merger {
                     previous_pl.writeCompressedPostingListToDisk(previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number+1).get(1).getChannel(),RandomAccessFile_map.get(SPIMI.block_number+1).get(2).getChannel());
                 }
 
-                //update the maxTf field
-                //previous_dict_elem.updateMaxTf(previous_pl);
-
                 //write dictionary to final file
                 previous_dict_elem.writeDictionaryElemToDisk(RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel());
 

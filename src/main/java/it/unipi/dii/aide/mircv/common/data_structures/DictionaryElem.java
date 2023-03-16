@@ -169,68 +169,6 @@ public class DictionaryElem {
         System.out.printf("Document Frequency: %d\nCollection Frequency: %d\nMax Term Frequency: %d\nPostingList docid lenght: %d\nPostingList freq: %d\n", this.getDf(), this.getCf(),this.getMaxTf(), this.getDocids_len(), this.getTf_len());
     }
 
-    /*public boolean writeDictionaryElemToDisk(FileChannel dictFchannel) throws IOException {
-        MappedByteBuffer dictBuffer;
-
-        try {
-            dictBuffer = dictFchannel.map(FileChannel.MapMode.READ_WRITE, dictFchannel.size(), 56);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        if(dictBuffer == null)
-            return false;
-
-        //convert String term into charBuffer for inserting it into file
-        CharBuffer charBuffer = CharBuffer.allocate(20);
-        for(int i = 0; i<this.term.length(); i++)
-            charBuffer.put(i, this.term.charAt(i));
-
-        //write the dictionary elem fields into file
-        dictBuffer.put(StandardCharsets.UTF_8.encode(charBuffer));
-        dictBuffer.putInt(this.df);
-        dictBuffer.putInt(this.cf);
-        dictBuffer.putLong(this.offset_docids);
-        dictBuffer.putInt(this.docids_len);
-        dictBuffer.putLong(this.offset_tf);
-        dictBuffer.putInt(this.tf_len);
-        dictBuffer.putInt(this.getMaxTf());
-
-        return true;
-    } */
-
-    /*public boolean readDictionaryElemFromDisk(long position, FileChannel dictFchannel) throws IOException {
-
-        MappedByteBuffer buffer;
-        try {
-            buffer = dictFchannel.map(FileChannel.MapMode.READ_ONLY, position, 20);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (buffer == null)
-            return false;
-
-        CharBuffer charBuffer = StandardCharsets.UTF_8.decode(buffer);
-        String[] term = charBuffer.toString().split("\0");
-        this.setTerm(term[0]);
-
-        buffer = dictFchannel.map(FileChannel.MapMode.READ_ONLY, position + 20, 36);
-
-        if (buffer == null)
-            return false;
-
-        this.setDf(buffer.getInt());
-        this.setCf(buffer.getInt());
-        this.setOffset_docids(buffer.getLong());
-        this.setDocids_len(buffer.getInt());
-        this.setOffset_tf(buffer.getLong());
-        this.setTf_len(buffer.getInt());
-        this.setMaxTf(buffer.getInt());
-
-        return true;
-    } */
-
     public void writeDictionaryElemToDisk(FileChannel dictFileChannel) throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(56);
         dictFileChannel.position(dictFileChannel.size());
