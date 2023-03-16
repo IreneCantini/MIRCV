@@ -30,8 +30,6 @@ public class Merger {
 
         boolean firstIteration = true;
 
-
-
         PriorityQueue<OrderedList> pQueue = new PriorityQueue<>(SPIMI.block_number == 0 ? 1 : SPIMI.block_number, new Comparator());
 
         //create the final files and associate the file Channels to them
@@ -59,7 +57,7 @@ public class Merger {
 
             //insert in the priority queue the next term from the same temporary dictionary file of the term just picked
             if(RandomAccessFile_map.get(ol.getIndex()).get(0).getChannel().size() > currentOffsetDictionary[ol.getIndex()] + 56) {
-                mappedByteBuffer = RandomAccessFile_map.get(ol.getIndex()).get(0).getChannel().map(FileChannel.MapMode.READ_ONLY,currentOffsetDictionary[ol.getIndex()], 20);
+                mappedByteBuffer = RandomAccessFile_map.get(ol.getIndex()).get(0).getChannel().map(FileChannel.MapMode.READ_ONLY,currentOffsetDictionary[ol.getIndex()] + 56, 20);
 
                 if(mappedByteBuffer != null){
                     String[] term = StandardCharsets.UTF_8.decode(mappedByteBuffer).toString().split("\0");

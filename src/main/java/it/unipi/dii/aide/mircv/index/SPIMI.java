@@ -30,6 +30,7 @@ public class SPIMI {
 
     public static void executeSPIMI(String path_collection, boolean mode) throws IOException, InterruptedException {
         //docid counter
+        int freq;
         int docid = 0;
         String docNo;
         DocumentIndexElem doc_elem;
@@ -55,31 +56,35 @@ public class SPIMI {
             doc_elem.writeDocIndexElemToDisk(doc_raf.getChannel());
 
             for (String term : tokens) {
+                freq = Collections.frequency(tokens, term);
+
                 //taglio il token a 20 caratteri
                 if (term.length() > 20)
                     term = term.substring(0, 20);
+
 
                 //check if the term is already inside the dictionary
                 if (!Dictionary_instance.containsKey(term)) {
                     //add the new term to the list of terms of the Dictionary
                     termList.add(term);
 
+
                     //add the new term inside the dictionary in memory
-                    Dictionary_instance.put(term, new DictionaryElem(term, 1, Collections.frequency(tokens, term)));
+                    Dictionary_instance.put(term, new DictionaryElem(term, 1,freq));
 
                     //create posting list of the term
-                    PostingLists_instance.put(term, new PostingList(term, new Posting(docid, Collections.frequency(tokens, term))));
+                    PostingLists_instance.put(term, new PostingList(term, new Posting(docid, freq)));
                 } else {
                     ArrayList<Posting> p = PostingLists_instance.get(term).getPl();
 
                     // check if the current term statistics for the document we are processing have been computed and if not calculate them
                     if(p.get(p.size()-1).getDocID() != docid) {
                         //term already exist in Dictionary, so it is necessary to update only the corresponding Dictionary Entry
-                        Dictionary_instance.get(term).incCf(Collections.frequency(tokens, term));
+                        Dictionary_instance.get(term).incCf(freq);
                         Dictionary_instance.get(term).incDf();
 
                         //retrieve the posting list of the term and adding a posting
-                        PostingLists_instance.get(term).addPosting(new Posting(docid,Collections.frequency(tokens, term)));
+                        PostingLists_instance.get(term).addPosting(new Posting(docid,freq));
                     }
                 }
             }

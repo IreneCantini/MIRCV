@@ -26,9 +26,11 @@ public class IndexUtils {
         int position = 0;
         DocumentIndexElem doc_elem;
 
+        FileChannel docindexFChannel = new RandomAccessFile(PATH_TO_DOCUMENT_INDEX, "rw").getChannel();
+
         while (position < Files.size(Path.of(PATH_TO_DOCUMENT_INDEX))){
             doc_elem = new DocumentIndexElem();
-            doc_elem.readDocumentIndexElemFromDisk(position, doc_raf.getChannel());
+            doc_elem.readDocumentIndexElemFromDisk(position, docindexFChannel);
             System.out.printf("Docid: %d, DocNo: %s, Lenght: %d\n",doc_elem.getDocId(), doc_elem.getDocNo().trim(), doc_elem.getLength());
             position += 36;
         }
@@ -40,9 +42,9 @@ public class IndexUtils {
         PostingList pl;
 
         //open file channels to output files
-        FileChannel dictionaryFchannel = (new RandomAccessFile(PATH_TO_VOCABULARY, "rw")).getChannel();
-        FileChannel docidsFchannel = (new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "rw")).getChannel();
-        FileChannel freqsFchannel = (new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "rw")).getChannel();
+        FileChannel dictionaryFchannel = new RandomAccessFile(PATH_TO_VOCABULARY, "rw").getChannel();
+        FileChannel docidsFchannel = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "rw").getChannel();
+        FileChannel freqsFchannel = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "rw").getChannel();
 
         while (position < Files.size(Path.of(PATH_TO_VOCABULARY))) {
             d_elem = new DictionaryElem();
@@ -60,13 +62,13 @@ public class IndexUtils {
 
 
             //test for checking if the inverted index is built properly
-           /* if(Objects.equals(pl.getTerm(), "amid"))
+            /*if(pl.getTerm().equals("amid"))
             {
                 System.out.println("dentro if");
                 System.out.printf("Term: '%s'\n", d_elem.getTerm());
                 d_elem.printVocabularyEntry();
                 pl.printPostingList();
-            } */
+            }*/
 
             pl.printPostingList();
 
