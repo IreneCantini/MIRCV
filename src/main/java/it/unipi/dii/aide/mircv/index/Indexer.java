@@ -11,16 +11,22 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
+import static it.unipi.dii.aide.mircv.common.compression.Unary.compressListOfTFs;
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
 
 public class Indexer {
     public static void main(String[] args) throws IOException, InterruptedException {
+/*
         long start = System.currentTimeMillis();
         SPIMI.executeSPIMI("src/main/resources/collection.tsv", true); //false: unfiltered, true: filtered
         System.out.println("COSTRUZIONE INVERTED INDEX COMPLETATA");
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;
         System.out.println("Inverted Index built in: " + time + " minutes");
+
+ */
+
+
 
         //IndexUtils.printInvertedIndex(true);
 
@@ -73,5 +79,15 @@ public class Indexer {
         DocumentIndexElem doc_elem = new DocumentIndexElem();
         doc_elem.readDocumentIndexElemFromDisk(0, file.getChannel());
         System.out.printf("Docid: %d, DocNo: %s, Lenght: %d\n",doc_elem.getDocId(), doc_elem.getDocNo().trim(), doc_elem.getLength()); */
+
+        ArrayList<Integer> freq= new ArrayList<>();
+        freq.add(3);
+        freq.add(10);
+        freq.add(1);
+        freq.add(7);
+
+        compressListOfTFs(freq);
+
+
     }
 }

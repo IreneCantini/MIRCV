@@ -1,33 +1,107 @@
 package it.unipi.dii.aide.mircv.common.data_structures;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+
 public class SkippingElem{
     private long docID; // Massimo DocId del blocco preso in considerazione
-    private int block_size; // Lunghezza blocco preso in considerazione
+    private long offset_docId;
+    private int block_docId_len; // Lunghezza blocco contenente docId preso in considerazione
+    private long offset_freq;
+    private int block_freq_len; // Lunghezza blocco contenente frequenze preso in considerazione
 
-
-    public SkippingElem(){
-        this.docID = 0;
-        this.block_size = 0;
+    public SkippingElem() {
+        docID = 0;
+        block_docId_len = 0;
+        block_freq_len = 0;
+        offset_docId = 0;
+        offset_freq = 0;
     }
-    public SkippingElem(long docID, int block_size) {
+
+    public SkippingElem(long docID, long offset_docId, int block_docId_len, long offset_freq, int block_freq_len) {
         this.docID = docID;
-        this.block_size = block_size;
+        this.offset_docId = offset_docId;
+        this.block_docId_len = block_docId_len;
+        this.offset_freq = offset_freq;
+        this.block_freq_len = block_freq_len;
     }
 
     public long getDocID() {
         return docID;
     }
 
-    public int getBlock_size() {
-        return block_size;
+    public int getBlock_docId_len() {
+        return block_docId_len;
+    }
+
+    public int getBlock_freq_len() {
+        return block_freq_len;
+    }
+
+    public long getOffset_docId() {
+        return offset_docId;
+    }
+
+    public long getOffset_freq() {
+        return offset_freq;
     }
 
     public void setDocID(long docID) {
         this.docID = docID;
     }
 
-    public void setBlock_size(int block_size) {
-        this.block_size = block_size;
+    public void setBlock_docId_len(int block_docId_len) {
+        this.block_docId_len = block_docId_len;
+    }
+
+    public void setBlock_freq_len(int block_freq_len) {
+        this.block_freq_len = block_freq_len;
+    }
+
+    public void setOffset_docId(long offset_docId) {
+        this.offset_docId = offset_docId;
+    }
+
+    public void setOffset_freq(long offset_freq) {
+        this.offset_freq = offset_freq;
+    }
+
+    public void writeSkippingElemToDisk(FileChannel skipFileChannel) throws IOException {
+        ByteBuffer skipInfoBuffer = ByteBuffer.allocate(32);
+        skipFileChannel.position(skipFileChannel.size());
+
+        //write the skipping elem fields into file
+        skipInfoBuffer.putLong(this.docID);
+        skipInfoBuffer.putLong(this.offset_docId);
+        skipInfoBuffer.putInt(this.block_docId_len);
+        skipInfoBuffer.putLong(this.offset_freq);
+        skipInfoBuffer.putInt(this.block_freq_len);
+
+        skipInfoBuffer = ByteBuffer.wrap(skipInfoBuffer.array());
+
+        while(skipInfoBuffer.hasRemaining()) {
+            skipFileChannel.write(skipInfoBuffer);
+        }
+    }
+
+    public void readSkippingElemFromDisk(int start_position, FileChannel skipFileChannel) throws IOException {
+        ByteBuffer skipInfoBuffer = ByteBuffer.allocate(32);
+
+        skipFileChannel.position(start_position);
+
+        while (skipInfoBuffer.hasRemaining()){
+            skipFileChannel.read(skipInfoBuffer);
+        }
+
+        skipInfoBuffer.rewind();
+        this.setDocID(skipInfoBuffer.getLong());
+        this.setOffset_docId(skipInfoBuffer.getLong());
+        this.setBlock_docId_len(skipInfoBuffer.getInt());
+        this.setOffset_freq(skipInfoBuffer.getLong());
+        this.setBlock_freq_len(skipInfoBuffer.getInt());
     }
 }
 

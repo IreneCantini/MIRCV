@@ -31,7 +31,12 @@ public class FileUtils {
     //PATH of the Document Index file
     public static final String PATH_TO_DOCUMENT_INDEX = "src/main/resources/document_index";
 
+    //PATH of the Skipping file
+    public static final String PATH_TO_SKIPPING_FILE = "src/main/resources/skipping";
+
     public static RandomAccessFile doc_raf;
+
+    public static RandomAccessFile skippingBlock_raf;
 
     public static final HashMap<Integer, ArrayList<RandomAccessFile>> RandomAccessFile_map = new HashMap<>();
 
@@ -54,14 +59,17 @@ public class FileUtils {
     public static void createFinalFile() throws FileNotFoundException {
         ArrayList<RandomAccessFile> raf_array = new ArrayList<>();
 
-        //create dictionary File and get the corresponding file channel
+        //create dictionary File
         raf_array.add(new RandomAccessFile(new File(PATH_TO_VOCABULARY), "rw"));
 
-        //create dictionary File and get the corresponding file channel
+        //create dictionary File
         raf_array.add(new RandomAccessFile(new File(PATH_TO_DOCIDS_POSTINGLIST), "rw"));
 
-        //create dictionary File and get the corresponding file channel
+        //create dictionary File
         raf_array.add(new RandomAccessFile(new File(PATH_TO_FREQ_POSTINGLIST), "rw"));
+
+        //create Skipping file
+        skippingBlock_raf = new RandomAccessFile(new File(PATH_TO_SKIPPING_FILE), "rw");
 
         RandomAccessFile_map.put(block_number + 1, raf_array);
     }

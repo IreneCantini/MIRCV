@@ -31,6 +31,12 @@ public class DictionaryElem {
     //maximum term frequency of the term
     private int maxTf;
 
+    //offset of the skipping information
+    private long offset_skipInfo;
+
+    //length of the skipping information
+    private int skipInfo_len;
+
     //default constructor (empty element)
     public DictionaryElem(){
         this.term = " ";
