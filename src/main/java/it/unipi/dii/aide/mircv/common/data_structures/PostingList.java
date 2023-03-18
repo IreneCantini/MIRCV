@@ -61,7 +61,7 @@ public class PostingList {
         }
     }
 
-    public void writePostingListToDisk(FileChannel docidsFchannel, FileChannel freqsFchannel) throws IOException {
+    public void writePostingListToDisk(SkippingElem skip_elem, DictionaryElem d_elem,FileChannel docidsFchannel, FileChannel freqsFchannel) throws IOException {
         ByteBuffer docsByteBuffer;
         ByteBuffer freqsByteBuffer;
 
@@ -85,9 +85,19 @@ public class PostingList {
         while (freqsByteBuffer.hasRemaining()) {
             freqsFchannel.write(freqsByteBuffer);
         }
+
+        //update the posting list lenght in the dictionary elem
+        d_elem.incDocidLen(docsByteBuffer.array().length);
+        d_elem.incFreqLen(freqsByteBuffer.array().length);
+
+        if(skip_elem != null) {
+            //update the posting list lenght in the skipping elem
+            skip_elem.setBlock_docId_len(docsByteBuffer.array().length);
+            skip_elem.setBlock_freq_len(freqsByteBuffer.array().length);
+        }
     }
 
-    public void writeCompressedPostingListToDisk(DictionaryElem d_elem, FileChannel docidsFchannel, FileChannel freqsFchannel) throws IOException {
+    public void writeCompressedPostingListToDisk(SkippingElem skip_elem, DictionaryElem d_elem, FileChannel docidsFchannel, FileChannel freqsFchannel) throws IOException {
 
         ArrayList<Long> docids = new ArrayList<>();
         ArrayList<Integer> freqs = new ArrayList<>();
@@ -117,8 +127,14 @@ public class PostingList {
         }
 
         //update the posting list lenght in the dictionary elem
-        d_elem.setDocids_len(docidsCompressed.length);
-        d_elem.setTf_len(freqsCompressed.length);
+        d_elem.incDocidLen(docidsCompressed.length);
+        d_elem.incFreqLen(freqsCompressed.length);
+
+        if(skip_elem != null) {
+            //update the posting list lenght in the skipping elem
+            skip_elem.setBlock_docId_len(docidsCompressed.length);
+            skip_elem.setBlock_freq_len(freqsCompressed.length);
+        }
     }
 
     public void readCompressedPostingListFromDisk(DictionaryElem d_elem,FileChannel docidsFchannel, FileChannel freqsFchannel) throws IOException {

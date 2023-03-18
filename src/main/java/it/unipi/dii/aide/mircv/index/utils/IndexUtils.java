@@ -49,8 +49,8 @@ public class IndexUtils {
         while (position < Files.size(Path.of(PATH_TO_VOCABULARY))) {
             d_elem = new DictionaryElem();
             d_elem.readDictionaryElemFromDisk(position, dictionaryFchannel);
-            System.out.printf("Term: '%s'\n", d_elem.getTerm());
-            d_elem.printVocabularyEntry();
+            //System.out.printf("Term: '%s'\n", d_elem.getTerm());
+            //d_elem.printVocabularyEntry();
 
             pl = new PostingList(d_elem.getTerm());
 
@@ -62,15 +62,15 @@ public class IndexUtils {
 
 
             //test for checking if the inverted index is built properly
-            /*if(pl.getTerm().equals("amid"))
+            if(pl.getPl().size()<3)
             {
-                System.out.println("dentro if");
+                //System.out.println("dentro if");
                 System.out.printf("Term: '%s'\n", d_elem.getTerm());
                 d_elem.printVocabularyEntry();
                 pl.printPostingList();
-            }*/
+            }
 
-            pl.printPostingList();
+            //pl.printPostingList();
 
             position += 56;
         }
@@ -93,17 +93,17 @@ public class IndexUtils {
 
             //update the offset and length of the corresponding docid posting list
             d_elem.setOffset_docids(RandomAccessFile_map.get(block_number).get(1).getChannel().size());
-            d_elem.setDocids_len(tmp_pl.getPl().size() * 8);
+            //d_elem.setDocids_len(tmp_pl.getPl().size() * 8);
 
             //update the offset and length of the corresponding freq posting list
             d_elem.setOffset_tf(RandomAccessFile_map.get(block_number).get(2).getChannel().size());
-            d_elem.setTf_len(tmp_pl.getPl().size() * 4);
+            //d_elem.setTf_len(tmp_pl.getPl().size() * 4);
 
             //update the maxTf field
             d_elem.updateMaxTf(tmp_pl);
 
             //write the PostingList of docid and freq in the temporary File
-            tmp_pl.writePostingListToDisk(RandomAccessFile_map.get(block_number).get(1).getChannel(), RandomAccessFile_map.get(block_number).get(2).getChannel());
+            tmp_pl.writePostingListToDisk(null, d_elem, RandomAccessFile_map.get(block_number).get(1).getChannel(), RandomAccessFile_map.get(block_number).get(2).getChannel());
 
             partialDictionary.put(term,d_elem);
 

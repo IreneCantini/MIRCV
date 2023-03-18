@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import static it.unipi.dii.aide.mircv.common.data_structures.SkippingElem.writeArraySkippingElemToDisk;
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
 
 public class Merger {
@@ -103,6 +104,7 @@ public class Merger {
                 previous_pl.getPl().addAll(current_pl.getPl());
             }else{
                 //the term picked is different from the previous one, so it is possible to write the dictionary and the posting list to disk
+                //firstly we are going to check if it is necessary to do skipping after that we are going to check the compression flag.
                 //if the flag compression is true it is necessary to do the compression before writing it on the disk
                 if(previous_pl.getPl().size()>= 1024) {
                     howManyDoc = (int) Math.ceil(Math.sqrt(previous_pl.getPl().size()));
@@ -111,26 +113,31 @@ public class Merger {
                         subPostingList = previous_pl.getPl().subList(i, i + howManyDoc);
                         arrSkipInfo.add(new SkippingElem(subPostingList.get(subPostingList.size()-1).getDocID(), RandomAccessFile_map.get(SPIMI.block_number+1).get(1).getChannel().size(), 0, RandomAccessFile_map.get(SPIMI.block_number+1).get(2).getChannel().size(), 0));
 
-
                         temp = new PostingList();
                         temp.getPl().addAll(subPostingList);
+                        //update the len of the skip field of the dictionary elem
+                        previous_dict_elem.incSkipInfo_len();
 
                         if (!flag_compression) {
                             //write posting list to final files
-                            temp.writePostingListToDisk(RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
+                            temp.writePostingListToDisk(arrSkipInfo.get(arrSkipInfo.size()-1), previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
                         } else {
                             //write the compressed posting list
-                            temp.writeCompressedPostingListToDisk(previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
+                            temp.writeCompressedPostingListToDisk(arrSkipInfo.get(arrSkipInfo.size()-1), previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
                         }
                     }
+
+                    //update the offset of the skip field of the dictionary elem and then write the skipping elem into the file
+                    previous_dict_elem.setOffset_skipInfo(skippingBlock_raf.getChannel().size());
+                    writeArraySkippingElemToDisk(arrSkipInfo, skippingBlock_raf.getChannel());
                 }
                 else{
                     if (!flag_compression) {
                         //write posting list to final files
-                        previous_pl.writePostingListToDisk(RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
+                        previous_pl.writePostingListToDisk(null, previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
                     } else {
                         //write the compressed posting list
-                        previous_pl.writeCompressedPostingListToDisk(previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
+                        previous_pl.writeCompressedPostingListToDisk(null, previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
                     }
                 }
 

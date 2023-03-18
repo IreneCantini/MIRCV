@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class SkippingElem{
     private long docID; // Massimo DocId del blocco preso in considerazione
@@ -69,6 +70,8 @@ public class SkippingElem{
         this.offset_freq = offset_freq;
     }
 
+
+
     public void writeSkippingElemToDisk(FileChannel skipFileChannel) throws IOException {
         ByteBuffer skipInfoBuffer = ByteBuffer.allocate(32);
         skipFileChannel.position(skipFileChannel.size());
@@ -102,6 +105,12 @@ public class SkippingElem{
         this.setBlock_docId_len(skipInfoBuffer.getInt());
         this.setOffset_freq(skipInfoBuffer.getLong());
         this.setBlock_freq_len(skipInfoBuffer.getInt());
+    }
+
+    public static void writeArraySkippingElemToDisk(ArrayList<SkippingElem> skip_array, FileChannel skipFileChannel) throws IOException {
+        for(SkippingElem skip_elem: skip_array){
+            skip_elem.writeSkippingElemToDisk(skipFileChannel);
+        }
     }
 }
 

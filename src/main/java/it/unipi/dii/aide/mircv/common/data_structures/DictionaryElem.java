@@ -47,6 +47,8 @@ public class DictionaryElem {
         this.offset_tf = 0;
         this.tf_len = 0;
         this.maxTf = 0;
+        this.offset_skipInfo = 0;
+        this.skipInfo_len = 0;
     }
 
     //constructor for the vocabulary entry for the term passed as parameter
@@ -59,6 +61,8 @@ public class DictionaryElem {
         this.offset_tf = 0;
         this.tf_len = 0;
         this.maxTf = 0;
+        this.offset_skipInfo = 0;
+        this.skipInfo_len = 0;
     }
 
     public DictionaryElem(String term, int df, int cf) {
@@ -70,6 +74,8 @@ public class DictionaryElem {
         this.offset_tf = 0;
         this.tf_len = 0;
         this.maxTf = 0;
+        this.offset_skipInfo = 0;
+        this.skipInfo_len = 0;
     }
 
     public void setTerm(String term) {
@@ -140,16 +146,8 @@ public class DictionaryElem {
         this.cf = this.cf + n;
     }
 
-    public void incDocidLen(){
-        this.docids_len++;
-    }
-
     public void incDocidLen(int n){
         this.docids_len = this.docids_len + n;
-    }
-
-    public void incFreqLen(){
-        this.tf_len++;
     }
 
     public void incFreqLen(int n){
@@ -170,6 +168,26 @@ public class DictionaryElem {
     public void setMaxTf(int maxTf) { this.maxTf = maxTf; }
 
     public int getMaxTf() { return this.maxTf; }
+
+    public void setOffset_skipInfo(long offset_skipInfo) {
+        this.offset_skipInfo = offset_skipInfo;
+    }
+
+    public void setSkipInfo_len(int skipInfo_len) {
+        this.skipInfo_len = skipInfo_len;
+    }
+
+    public long getOffset_skipInfo() {
+        return offset_skipInfo;
+    }
+
+    public int getSkipInfo_len() {
+        return skipInfo_len;
+    }
+
+    public void incSkipInfo_len(){
+        this.skipInfo_len += 32;
+    }
 
     public void printVocabularyEntry(){
         System.out.printf("Document Frequency: %d\nCollection Frequency: %d\nMax Term Frequency: %d\nPostingList docid lenght: %d\nPostingList freq: %d\n", this.getDf(), this.getCf(),this.getMaxTf(), this.getDocids_len(), this.getTf_len());
