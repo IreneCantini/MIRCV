@@ -38,7 +38,7 @@ public class Merger {
         int howManyDoc;
         List<Posting> subPostingList;
         PostingList temp;
-        ArrayList<SkippingElem> arrSkipInfo = null;
+        ArrayList<SkippingElem> arrSkipInfo = new ArrayList<>();
 
         boolean firstIteration = true;
 
