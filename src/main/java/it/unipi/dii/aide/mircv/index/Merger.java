@@ -8,7 +8,6 @@ import it.unipi.dii.aide.mircv.common.data_structures.min_heap.Comparator;
 import it.unipi.dii.aide.mircv.common.data_structures.min_heap.OrderedList;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +17,7 @@ import java.util.PriorityQueue;
 
 import static it.unipi.dii.aide.mircv.common.data_structures.SkippingElem.writeArraySkippingElemToDisk;
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
+import static java.lang.Math.min;
 
 public class Merger {
     private static final long[] currentOffsetDictionary = new long[SPIMI.block_number+1];
@@ -110,7 +110,7 @@ public class Merger {
                     howManyDoc = (int) Math.ceil(Math.sqrt(previous_pl.getPl().size()));
                     for (int i = 0; i < previous_pl.getPl().size(); i += howManyDoc) {
 
-                        subPostingList = previous_pl.getPl().subList(i, i + howManyDoc);
+                        subPostingList = previous_pl.getPl().subList(i, min(i + howManyDoc, previous_pl.getPl().size()));
                         arrSkipInfo.add(new SkippingElem(subPostingList.get(subPostingList.size()-1).getDocID(), RandomAccessFile_map.get(SPIMI.block_number+1).get(1).getChannel().size(), 0, RandomAccessFile_map.get(SPIMI.block_number+1).get(2).getChannel().size(), 0));
 
                         temp = new PostingList();
