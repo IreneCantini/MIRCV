@@ -130,6 +130,7 @@ public class Merger {
                     //update the offset of the skip field of the dictionary elem and then write the skipping elem into the file
                     previous_dict_elem.setOffset_skipInfo(skippingBlock_raf.getChannel().size());
                     writeArraySkippingElemToDisk(arrSkipInfo, skippingBlock_raf.getChannel());
+                    arrSkipInfo.clear();
                 }
                 else{
                     if (!flag_compression) {
