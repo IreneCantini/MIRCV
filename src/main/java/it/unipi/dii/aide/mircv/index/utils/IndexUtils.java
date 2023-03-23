@@ -64,7 +64,6 @@ public class IndexUtils {
             //test for checking if the inverted index is built properly
             if(pl.getPl().size()<3)
             {
-                //System.out.println("dentro if");
                 System.out.printf("Term: '%s'\n", d_elem.getTerm());
                 d_elem.printVocabularyEntry();
                 pl.printPostingList();
