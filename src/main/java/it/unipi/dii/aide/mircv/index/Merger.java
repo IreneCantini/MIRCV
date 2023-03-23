@@ -107,7 +107,7 @@ public class Merger {
                 //firstly we are going to check if it is necessary to do skipping after that we are going to check the compression flag.
                 //if the flag compression is true it is necessary to do the compression before writing it on the disk
 
-
+                //set the len of the posting list to 0 for setting it with the final lenght of the merged posting list using the inc method
                 previous_dict_elem.setDocids_len(0);
                 previous_dict_elem.setTf_len(0);
 
