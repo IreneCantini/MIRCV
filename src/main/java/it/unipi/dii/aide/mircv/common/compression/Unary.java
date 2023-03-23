@@ -23,6 +23,14 @@ public class Unary {
             i++;
         }
 
+        if(bs.get(bs.length()-1))
+        {
+            // if the last bit is equal to 1 insert a byte of all 0s
+            for (i=0; i<8; i++){
+                bs.set(bs.length()+1, false);
+            }
+        }
+
         /*StringBuilder s = new StringBuilder();
         for( int j = 0; j < bs.length()+1;  j++ )
         {
