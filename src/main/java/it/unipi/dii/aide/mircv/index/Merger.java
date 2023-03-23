@@ -106,6 +106,11 @@ public class Merger {
                 //the term picked is different from the previous one, so it is possible to write the dictionary and the posting list to disk
                 //firstly we are going to check if it is necessary to do skipping after that we are going to check the compression flag.
                 //if the flag compression is true it is necessary to do the compression before writing it on the disk
+
+                //set the len of the posting list to 0 for setting it with the final lenght of the merged posting list using the inc method
+                previous_dict_elem.setDocids_len(0);
+                previous_dict_elem.setTf_len(0);
+
                 if(previous_pl.getPl().size()>= 1024) {
                     howManyDoc = (int) Math.ceil(Math.sqrt(previous_pl.getPl().size()));
                     for (int i = 0; i < previous_pl.getPl().size(); i += howManyDoc) {
