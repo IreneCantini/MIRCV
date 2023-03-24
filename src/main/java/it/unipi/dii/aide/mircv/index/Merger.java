@@ -112,6 +112,7 @@ public class Merger {
                 previous_dict_elem.setTf_len(0);
                 previous_dict_elem.computeIdf();
                 previous_dict_elem.computeMaxTFIDF();
+                previous_dict_elem.computeMaxBM25(previous_pl);
 
                 if(previous_pl.getPl().size()>= 1024) {
                     howManyDoc = (int) Math.ceil(Math.sqrt(previous_pl.getPl().size()));

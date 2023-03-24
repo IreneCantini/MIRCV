@@ -23,9 +23,13 @@ public class Indexer {
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;
         System.out.println("Inverted Index built in: " + time + " minutes");
+
          */
 
+
         IndexUtils.printInvertedIndex(true);
+
+        //IndexUtils.printSkipping();
 
         //IndexUtils.printDocumentIndex();
 

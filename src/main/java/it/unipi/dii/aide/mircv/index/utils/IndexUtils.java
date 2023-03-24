@@ -62,7 +62,7 @@ public class IndexUtils {
 
 
             //test for checking if the inverted index is built properly
-            if(d_elem.getTerm().equals("amidst"))
+            if(pl.getPl().size() <= 10)
             {
                 System.out.printf("Term: '%s'\n", d_elem.getTerm());
                 d_elem.printVocabularyEntry();
