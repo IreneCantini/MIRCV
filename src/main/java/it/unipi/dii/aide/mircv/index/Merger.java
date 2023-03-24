@@ -68,8 +68,8 @@ public class Merger {
             ol = pQueue.poll();
 
             //insert in the priority queue the next term from the same temporary dictionary file of the term just picked
-            if(RandomAccessFile_map.get(ol.getIndex()).get(0).getChannel().size() > currentOffsetDictionary[ol.getIndex()] + 84) {
-                mappedByteBuffer = RandomAccessFile_map.get(ol.getIndex()).get(0).getChannel().map(FileChannel.MapMode.READ_ONLY,currentOffsetDictionary[ol.getIndex()] + 84, 20);
+            if(RandomAccessFile_map.get(ol.getIndex()).get(0).getChannel().size() > currentOffsetDictionary[ol.getIndex()] + 92) {
+                mappedByteBuffer = RandomAccessFile_map.get(ol.getIndex()).get(0).getChannel().map(FileChannel.MapMode.READ_ONLY,currentOffsetDictionary[ol.getIndex()] + 92, 20);
 
                 if(mappedByteBuffer != null){
                     String[] term = StandardCharsets.UTF_8.decode(mappedByteBuffer).toString().split("\0");
@@ -80,7 +80,7 @@ public class Merger {
 
             //read from the disk the Dictionary elem corresponding to the term picked from the dictionary file corresponding to the picked index
             current_dict_elem.readDictionaryElemFromDisk(currentOffsetDictionary[ol.getIndex()], RandomAccessFile_map.get(ol.getIndex()).get(0).getChannel());
-            currentOffsetDictionary[ol.getIndex()] += 84;
+            currentOffsetDictionary[ol.getIndex()] += 92;
 
             //read from disk the Posting list corresponding to the current Dictionary
             current_pl.readPostingListFromDisk(current_dict_elem, RandomAccessFile_map.get(ol.getIndex()).get(1).getChannel(), RandomAccessFile_map.get(ol.getIndex()).get(2).getChannel());
@@ -113,7 +113,7 @@ public class Merger {
                 previous_dict_elem.computeIdf();
                 previous_dict_elem.computeMaxTFIDF();
 
-                if(previous_pl.getPl().size()>= 5) {
+                if(previous_pl.getPl().size()>= 1024) {
                     howManyDoc = (int) Math.ceil(Math.sqrt(previous_pl.getPl().size()));
                     for (int i = 0; i < previous_pl.getPl().size(); i += howManyDoc) {
 

@@ -18,7 +18,7 @@ public class QueryUtils {
 
         // Variabili per mantenere gli estremi della ricerca e la posizione centrale
         long low = 0;
-        long high = (RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel().size() / 84); // Mantiene quanti termini sono presenti nel dizionario
+        long high = (RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel().size() / 92); // Mantiene quanti termini sono presenti nel dizionario
         long mid;
 
         // Variabili di appoggio temporaneo
@@ -34,7 +34,7 @@ public class QueryUtils {
             mid = (low + high) / 2;
 
             // get term
-            mappedByteBuffer = RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel().map(FileChannel.MapMode.READ_ONLY, mid*84, 20);
+            mappedByteBuffer = RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel().map(FileChannel.MapMode.READ_ONLY, mid*92, 20);
 
             if (mappedByteBuffer != null) {
                 d.setTerm(StandardCharsets.UTF_8.decode(mappedByteBuffer).toString());
@@ -49,7 +49,7 @@ public class QueryUtils {
                 high = mid - 1;
             } else {
                 // Termine trovato
-                d.readDictionaryElemFromDisk(mid*84, RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel());
+                d.readDictionaryElemFromDisk(mid*92, RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel());
 
                 return d; // ritorna l'oggetto dizionario relativo a quel termine
             }

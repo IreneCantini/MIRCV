@@ -1,5 +1,7 @@
 package it.unipi.dii.aide.mircv.common.data_structures;
 
+import it.unipi.dii.aide.mircv.index.SPIMI;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -45,6 +47,8 @@ public class DictionaryElem {
     //Term upper bound for tfidf
     private double maxTFIDF;
 
+    private double maxBM25;
+
     //default constructor (empty element)
     public DictionaryElem(){
         this.term = " ";
@@ -59,6 +63,7 @@ public class DictionaryElem {
         this.skipInfo_len = 0;
         this.idf = 0;
         this.maxTFIDF = 0;
+        this.maxBM25 = 0;
     }
 
     //constructor for the vocabulary entry for the term passed as parameter
@@ -75,6 +80,7 @@ public class DictionaryElem {
         this.skipInfo_len = 0;
         this.idf = 0;
         this.maxTFIDF = 0;
+        this.maxBM25 = 0;
     }
 
     public DictionaryElem(String term, int df, int cf) {
@@ -90,6 +96,7 @@ public class DictionaryElem {
         this.skipInfo_len = 0;
         this.idf = 0;
         this.maxTFIDF = 0;
+        this.maxBM25 = 0;
     }
 
     public void setTerm(String term) {
@@ -120,6 +127,10 @@ public class DictionaryElem {
         this.tf_len = tf_len;
     }
 
+    public void setMaxBM25(double maxBM25) {
+        this.maxBM25 = maxBM25;
+    }
+
     public String getTerm() {
         return term;
     }
@@ -146,6 +157,10 @@ public class DictionaryElem {
 
     public int getTf_len() {
         return tf_len;
+    }
+
+    public double getMaxBM25() {
+        return maxBM25;
     }
 
     public void incDf(){
@@ -219,6 +234,17 @@ public class DictionaryElem {
         this.maxTFIDF = (1+Math.log10(this.maxTf))*this.idf;
     }
 
+    public void computeMaxBM25(PostingList pl) {
+        double current_BM25;
+        for (Posting p: pl.getPl())
+        {
+            current_BM25 = (p.getTermFrequency() / ((1 - 0.75) + 0.75 * (SPIMI.Document_index_map.get(p.getDocID()) / SPIMI.avdl) + p.getTermFrequency()))*this.idf;
+            if(current_BM25>this.getMaxBM25()){
+                this.setMaxBM25(current_BM25);
+            }
+        }
+    }
+
     public double getIdf() {
         return idf;
     }
@@ -229,13 +255,13 @@ public class DictionaryElem {
 
     public void printVocabularyEntry(){
         System.out.printf("Document Frequency: %d\nCollection Frequency: %d\nMax Term Frequency: %d\nPostingList docid lenght: %d\n" +
-                "PostingList freq: %d\nSkipping length: %d\nIDF: %f\nMax TFIDF: %f\n",
+                "PostingList freq: %d\nSkipping length: %d\nIDF: %f\nMax TFIDF: %f\nMax BM25: %f\n",
                 this.getDf(), this.getCf(),this.getMaxTf(), this.getDocids_len(), this.getTf_len(),
-                this.getSkipInfo_len(), this.getIdf(), this.getMaxTFIDF());
+                this.getSkipInfo_len(), this.getIdf(), this.getMaxTFIDF(), this.getMaxBM25());
     }
 
     public void writeDictionaryElemToDisk(FileChannel dictFileChannel) throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(84);
+        ByteBuffer buffer = ByteBuffer.allocate(92);
         dictFileChannel.position(dictFileChannel.size());
 
         CharBuffer charBuffer = CharBuffer.allocate(20);
@@ -255,6 +281,7 @@ public class DictionaryElem {
         buffer.putInt(this.skipInfo_len);
         buffer.putDouble(this.idf);
         buffer.putDouble(this.maxTFIDF);
+        buffer.putDouble(this.maxBM25);
 
         buffer = ByteBuffer.wrap(buffer.array());
 
@@ -274,7 +301,7 @@ public class DictionaryElem {
 
         this.setTerm(new String(buffer.array(), StandardCharsets.UTF_8).trim());
 
-        buffer = ByteBuffer.allocate(64);
+        buffer = ByteBuffer.allocate(72);
 
         while (buffer.hasRemaining()){
             dictFchannel.read(buffer);
@@ -292,5 +319,6 @@ public class DictionaryElem {
         this.setSkipInfo_len(buffer.getInt());
         this.setIdf(buffer.getDouble());
         this.setMaxTFIDF(buffer.getDouble());
+        this.setMaxBM25(buffer.getLong());
     }
 }

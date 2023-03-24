@@ -29,10 +29,19 @@ public class SPIMI {
     //Posting list of a term in memory
     public static HashMap<String, PostingList> PostingLists_instance = new HashMap<>();
 
+    //All document information
+    public static HashMap<Long, Long> Document_index_map = new HashMap<>();
+
+    //total document length
+    public static double totdl=0;
+
+    //average document length variable
+    public static double avdl=0;
+
     public static void executeSPIMI(String path_collection, boolean mode) throws IOException, InterruptedException {
         //docid counter
         int freq;
-        int docid = 0;
+        long docid = 0;
         String docNo;
         DocumentIndexElem doc_elem;
 
@@ -53,6 +62,8 @@ public class SPIMI {
             tokens.remove(0);
 
             doc_elem = new DocumentIndexElem(docid, docNo, tokens.size());
+            Document_index_map.put(docid, (long)tokens.size());
+            totdl+=tokens.size();
             doc_elem.writeDocIndexElemToDisk(doc_raf.getChannel());
 
             for (String term : tokens) {
@@ -115,6 +126,7 @@ public class SPIMI {
             line = reader.readLine();
         }
 
+        avdl=totdl/docid;
         collection_length = docid;
 
         //write the final block in memory

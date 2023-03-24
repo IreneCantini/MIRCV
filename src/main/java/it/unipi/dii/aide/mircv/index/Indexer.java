@@ -16,20 +16,20 @@ import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
 public class Indexer {
     public static void main(String[] args) throws IOException, InterruptedException {
 
+        /*
         long start = System.currentTimeMillis();
-        SPIMI.executeSPIMI("src/main/resources/collection_prova.tsv", true); //false: unfiltered, true: filtered
+        SPIMI.executeSPIMI("src/main/resources/collection.tsv", true); //false: unfiltered, true: filtered
         System.out.println("COSTRUZIONE INVERTED INDEX COMPLETATA");
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;
         System.out.println("Inverted Index built in: " + time + " minutes");
-
-
+         */
 
         IndexUtils.printInvertedIndex(true);
 
         //IndexUtils.printDocumentIndex();
- /*
-        RandomAccessFile file = new RandomAccessFile(PATH_TO_VOCABULARY, "rw");
+
+       /* RandomAccessFile file = new RandomAccessFile(PATH_TO_VOCABULARY, "rw");
         DictionaryElem d_elem = new DictionaryElem("ciao", 3, 4);
         d_elem.setOffset_docids(32);
         d_elem.setDocids_len(16);
@@ -43,43 +43,31 @@ public class Indexer {
 
         result.readDictionaryElemFromDisk(0, file.getChannel());
         System.out.println(result.getTerm());
-        result.printVocabularyEntry();
+        result.printVocabularyEntry(); */
 
-        RandomAccessFile file_docids = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "rw");
+      /*  RandomAccessFile file_docids = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "rw");
         RandomAccessFile file_freqs = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "rw");
 
-        DictionaryElem d_elem = new DictionaryElem("manhattan");
+        DictionaryElem d_elem = new DictionaryElem("ciao",4,9);
+        d_elem.setOffset_docids(0);
+        d_elem.setDocids_len(32);
+        d_elem.setOffset_tf(0);
+        d_elem.setTf_len(16);
+        d_elem.setMaxTf(3);
 
         ArrayList<Posting> pl_array = new ArrayList<>();
-        pl_array.add(new Posting(1,1));
-        pl_array.add(new Posting(2,1));
-        pl_array.add(new Posting(3,1));
+        pl_array.add(new Posting(5,3));
         pl_array.add(new Posting(4,2));
+        pl_array.add(new Posting(10,3));
+        pl_array.add(new Posting(2,1));
+        PostingList pl = new PostingList("ciao", pl_array);
 
-        PostingList pl = new PostingList("manhattan", pl_array);
+        pl.writeCompressedPostingListToDisk(d_elem, file_docids.getChannel(), file_freqs.getChannel());
 
-        pl.writeCompressedPostingListToDisk(null, d_elem, file_docids.getChannel(), file_freqs.getChannel());
-
-        pl_array.clear();
-        pl_array.add(new Posting(4,1));
-        pl_array.add(new Posting(6,2));
-        pl_array.add(new Posting(7,1));
-
-        pl = new PostingList("manhattan", pl_array);
-
-        pl.writeCompressedPostingListToDisk(null, d_elem, file_docids.getChannel(), file_freqs.getChannel());
-
-        pl_array.clear();
-        pl_array.add(new Posting(9,1));
-
-        pl = new PostingList("manhattan", pl_array);
-
-        pl.writeCompressedPostingListToDisk(null, d_elem, file_docids.getChannel(), file_freqs.getChannel());
-
-        PostingList result = new PostingList("manhattan");
+        PostingList result = new PostingList("ciao");
         result.readCompressedPostingListFromDisk(d_elem, file_docids.getChannel(), file_freqs.getChannel());
 
-        result.printPostingList();
+        result.printPostingList(); */
 
        /* RandomAccessFile file = new RandomAccessFile(PATH_TO_DOCUMENT_INDEX, "rw");
 
