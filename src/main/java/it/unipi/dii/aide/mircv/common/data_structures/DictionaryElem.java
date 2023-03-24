@@ -212,7 +212,7 @@ public class DictionaryElem {
     }
 
     public void computeIdf() {
-        this.idf = Math.log10(collection_length/this.df);
+        this.idf = Math.log10(collection_length/(double)this.df);
     }
 
     public void computeMaxTFIDF() {

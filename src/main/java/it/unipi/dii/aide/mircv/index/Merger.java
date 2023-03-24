@@ -110,12 +110,12 @@ public class Merger {
                 //set the len of the posting list to 0 for setting it with the final lenght of the merged posting list using the inc method
                 previous_dict_elem.setDocids_len(0);
                 previous_dict_elem.setTf_len(0);
+                previous_dict_elem.computeIdf();
+                previous_dict_elem.computeMaxTFIDF();
 
                 if(previous_pl.getPl().size()>= 5) {
                     howManyDoc = (int) Math.ceil(Math.sqrt(previous_pl.getPl().size()));
                     for (int i = 0; i < previous_pl.getPl().size(); i += howManyDoc) {
-
-                        if(previous_dict_elem.getTerm().equals("manhattan")){};
 
                         subPostingList = previous_pl.getPl().subList(i, min(i + howManyDoc, previous_pl.getPl().size()));
                         arrSkipInfo.add(new SkippingElem(subPostingList.get(subPostingList.size()-1).getDocID(), RandomAccessFile_map.get(SPIMI.block_number+1).get(1).getChannel().size(), 0, RandomAccessFile_map.get(SPIMI.block_number+1).get(2).getChannel().size(), 0));
