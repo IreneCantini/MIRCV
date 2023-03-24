@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.collection_length;
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.doc_raf;
 import static it.unipi.dii.aide.mircv.index.utils.IndexUtils.cleanMemory;
 
@@ -113,6 +114,8 @@ public class SPIMI {
             }
             line = reader.readLine();
         }
+
+        collection_length = docid;
 
         //write the final block in memory
         System.out.println("Procedo con la scrittura su disco del blocco finale in memoria");
