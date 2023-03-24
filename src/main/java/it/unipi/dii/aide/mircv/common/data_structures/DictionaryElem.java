@@ -7,6 +7,8 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
+import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.collection_length;
+
 public class DictionaryElem {
     private String term;
 
@@ -37,6 +39,12 @@ public class DictionaryElem {
     //length of the skipping information
     private int skipInfo_len;
 
+    //inverse document frequencies
+    private double idf;
+
+    //Term upper bound for tfidf
+    private double maxTFIDF;
+
     //default constructor (empty element)
     public DictionaryElem(){
         this.term = " ";
@@ -49,6 +57,8 @@ public class DictionaryElem {
         this.maxTf = 0;
         this.offset_skipInfo = 0;
         this.skipInfo_len = 0;
+        this.idf = 0;
+        this.maxTFIDF = 0;
     }
 
     //constructor for the vocabulary entry for the term passed as parameter
@@ -63,6 +73,8 @@ public class DictionaryElem {
         this.maxTf = 0;
         this.offset_skipInfo = 0;
         this.skipInfo_len = 0;
+        this.idf = 0;
+        this.maxTFIDF = 0;
     }
 
     public DictionaryElem(String term, int df, int cf) {
@@ -76,6 +88,8 @@ public class DictionaryElem {
         this.maxTf = 0;
         this.offset_skipInfo = 0;
         this.skipInfo_len = 0;
+        this.idf = 0;
+        this.maxTFIDF = 0;
     }
 
     public void setTerm(String term) {
@@ -189,12 +203,39 @@ public class DictionaryElem {
         this.skipInfo_len += 32;
     }
 
+    public void setIdf(double idf) {
+        this.idf = idf;
+    }
+
+    public void setMaxTFIDF(double maxTFIDF) {
+        this.maxTFIDF = maxTFIDF;
+    }
+
+    public void computeIdf() {
+        this.idf = Math.log10(collection_length/this.df);
+    }
+
+    public void computeMaxTFIDF() {
+        this.maxTFIDF = (1+Math.log10(this.maxTf))*this.idf;
+    }
+
+    public double getIdf() {
+        return idf;
+    }
+
+    public double getMaxTFIDF() {
+        return maxTFIDF;
+    }
+
     public void printVocabularyEntry(){
-        System.out.printf("Document Frequency: %d\nCollection Frequency: %d\nMax Term Frequency: %d\nPostingList docid lenght: %d\nPostingList freq: %d\n", this.getDf(), this.getCf(),this.getMaxTf(), this.getDocids_len(), this.getTf_len());
+        System.out.printf("Document Frequency: %d\nCollection Frequency: %d\nMax Term Frequency: %d\nPostingList docid lenght: %d\n" +
+                "PostingList freq: %d\nSkipping length: %d\nIDF: %f\nMax TFIDF: %f\n",
+                this.getDf(), this.getCf(),this.getMaxTf(), this.getDocids_len(), this.getTf_len(),
+                this.getSkipInfo_len(), this.getIdf(), this.getMaxTFIDF());
     }
 
     public void writeDictionaryElemToDisk(FileChannel dictFileChannel) throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(56);
+        ByteBuffer buffer = ByteBuffer.allocate(84);
         dictFileChannel.position(dictFileChannel.size());
 
         CharBuffer charBuffer = CharBuffer.allocate(20);
@@ -209,7 +250,11 @@ public class DictionaryElem {
         buffer.putInt(this.docids_len);
         buffer.putLong(this.offset_tf);
         buffer.putInt(this.tf_len);
-        buffer.putInt(this.getMaxTf());
+        buffer.putInt(this.maxTf);
+        buffer.putLong(this.offset_skipInfo);
+        buffer.putInt(this.skipInfo_len);
+        buffer.putDouble(this.idf);
+        buffer.putDouble(this.maxTFIDF);
 
         buffer = ByteBuffer.wrap(buffer.array());
 
@@ -229,7 +274,7 @@ public class DictionaryElem {
 
         this.setTerm(new String(buffer.array(), StandardCharsets.UTF_8).trim());
 
-        buffer = ByteBuffer.allocate(36);
+        buffer = ByteBuffer.allocate(64);
 
         while (buffer.hasRemaining()){
             dictFchannel.read(buffer);
@@ -243,5 +288,9 @@ public class DictionaryElem {
         this.setOffset_tf(buffer.getLong());
         this.setTf_len(buffer.getInt());
         this.setMaxTf(buffer.getInt());
+        this.setOffset_skipInfo(buffer.getLong());
+        this.setSkipInfo_len(buffer.getInt());
+        this.setIdf(buffer.getDouble());
+        this.setMaxTFIDF(buffer.getDouble());
     }
 }

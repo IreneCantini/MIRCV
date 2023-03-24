@@ -70,8 +70,6 @@ public class SkippingElem{
         this.offset_freq = offset_freq;
     }
 
-
-
     public void writeSkippingElemToDisk(FileChannel skipFileChannel) throws IOException {
         ByteBuffer skipInfoBuffer = ByteBuffer.allocate(32);
         skipFileChannel.position(skipFileChannel.size());
@@ -111,6 +109,13 @@ public class SkippingElem{
         for(SkippingElem skip_elem: skip_array){
             skip_elem.writeSkippingElemToDisk(skipFileChannel);
         }
+    }
+
+    public void printSkippingElem() {
+
+        System.out.printf("DocId: '%s'\n", this.getDocID());
+        System.out.printf("BlockId Len: '%s'\n", this.getBlock_docId_len());
+        System.out.printf("BlockFreqLen: '%s'\n", this.getBlock_freq_len());
     }
 }
 

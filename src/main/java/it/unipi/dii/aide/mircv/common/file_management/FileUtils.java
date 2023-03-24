@@ -10,6 +10,9 @@ import java.util.HashMap;
 import static it.unipi.dii.aide.mircv.index.SPIMI.block_number;
 
 public class FileUtils {
+    //Total number of documents in the collection
+    public static long collection_length = 0;
+
     //partial PATH of the temporary docid posting lists file
     public static final String PATH_TO_PARTIAL_DOCIDS_POSTINGLIST = "src/main/resources/docid_pl_tmp_";
 
