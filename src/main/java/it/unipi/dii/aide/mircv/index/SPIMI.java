@@ -147,6 +147,14 @@ public class SPIMI {
 
         System.out.println("OPERAZIONE DI MERGING COMPLETATA");
 
+        //set the final Collection info and write it to disk
+        CollectionInfo.setTotal_doc_len((long)totdl);
+        CollectionInfo.setDocid_counter(docid);
+        CollectionInfo.writeCollectionInfoToDisk();
+
+        //write the Flags to disk
+        Flags.writeFlagToDisk();
+
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;
         System.out.println("Merge operation executed in: " + time + " minutes");

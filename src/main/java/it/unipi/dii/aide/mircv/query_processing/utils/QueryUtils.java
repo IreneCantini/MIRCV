@@ -110,4 +110,6 @@ public class QueryUtils {
 
         return Collections.min(docid_candidate);
     }
+
+
 }

@@ -37,9 +37,19 @@ public class FileUtils {
     //PATH of the Skipping file
     public static final String PATH_TO_SKIPPING_FILE = "src/main/resources/skipping";
 
+    //PATH of the Collection Info file
+    public static final String PATH_TO_COLLECTION_INFO_FILE = "src/main/resources/collection_info";
+
+    //PATH of the Flags file
+    public static final String PATH_TO_FLAGS_FILE = "src/main/resources/flags";
+
     public static RandomAccessFile doc_raf;
 
     public static RandomAccessFile skippingBlock_raf;
+
+    public static RandomAccessFile CollectionInfo_raf;
+
+    public static RandomAccessFile Flags_raf;
 
     public static final HashMap<Integer, ArrayList<RandomAccessFile>> RandomAccessFile_map = new HashMap<>();
 
@@ -73,6 +83,12 @@ public class FileUtils {
 
         //create Skipping file
         skippingBlock_raf = new RandomAccessFile(new File(PATH_TO_SKIPPING_FILE), "rw");
+
+        //create Collection Info file
+        CollectionInfo_raf = new RandomAccessFile(new File(PATH_TO_COLLECTION_INFO_FILE),"rw");
+
+        //create Flags file
+        Flags_raf = new RandomAccessFile(new File(PATH_TO_FLAGS_FILE),"rw");
 
         RandomAccessFile_map.put(block_number + 1, raf_array);
     }

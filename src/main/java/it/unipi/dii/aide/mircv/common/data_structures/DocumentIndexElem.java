@@ -55,25 +55,6 @@ public class DocumentIndexElem {
         return length;
     }
 
-    /*public void writeDocIndexElemToDisk() throws IOException {
-
-        MappedByteBuffer docIndexBuffer;
-
-        docIndexBuffer = doc_raf.getChannel().map(FileChannel.MapMode.READ_WRITE, doc_raf.getChannel().size(), 36);
-
-
-        if(docIndexBuffer != null){
-            //write the document index elem fields into the corresponding file
-            CharBuffer charBuffer = CharBuffer.allocate(20);
-            for(int i = 0; i<this.docNo.length(); i++)
-                charBuffer.put(i, this.docNo.charAt(i));
-
-            docIndexBuffer.put(StandardCharsets.UTF_8.encode(charBuffer));
-            docIndexBuffer.putLong(this.docId);
-            docIndexBuffer.putLong(this.length);
-        }
-    }*/
-
     public void writeDocIndexElemToDisk(FileChannel docIndexFileChannel) throws IOException {
         ByteBuffer docIndexBuffer = ByteBuffer.allocate(36);
         docIndexFileChannel.position(docIndexFileChannel.size());
@@ -82,7 +63,7 @@ public class DocumentIndexElem {
         for(int i = 0; i<this.docNo.length(); i++)
             charBuffer.put(i, this.docNo.charAt(i));
 
-        //write the dictionary elem fields into file
+        //write the document elem fields into file
         docIndexBuffer.put(StandardCharsets.UTF_8.encode(charBuffer));
         docIndexBuffer.putLong(this.docId);
         docIndexBuffer.putLong(this.length);
@@ -93,23 +74,6 @@ public class DocumentIndexElem {
             docIndexFileChannel.write(docIndexBuffer);
         }
     }
-
-    /*public void readDocumentIndexElemFromDisk(int position) throws IOException {
-        MappedByteBuffer buffer;
-
-        buffer = doc_raf.getChannel().map(FileChannel.MapMode.READ_ONLY,position, 20);
-
-        if(buffer!=null){
-            CharBuffer charBuffer = StandardCharsets.UTF_8.decode(buffer);
-            String[] term = charBuffer.toString().split("\0");
-            this.setDocNo(term[0]);
-        }
-
-        buffer = doc_raf.getChannel().map(FileChannel.MapMode.READ_ONLY, position + 20, 16);
-
-        this.setDocId(buffer.getLong());
-        this.setLength(buffer.getLong());
-    }*/
 
     public void readDocumentIndexElemFromDisk(int start_position, FileChannel docIndexFileChannel) throws IOException {
         ByteBuffer docIndexBuffer = ByteBuffer.allocate(20);

@@ -20,7 +20,7 @@ import static it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils.minimumD
 
 public class DAAT {
 
-    public static PriorityQueue<DocumentScore> executeDAAT(int k) throws IOException {
+  /*  public static PriorityQueue<DocumentScore> executeDAAT(int k) throws IOException {
 
         // RandomAccessFile to read the document index
         RandomAccessFile documentIndex_raf = new RandomAccessFile(PATH_TO_DOCUMENT_INDEX, "r");
@@ -51,33 +51,33 @@ public class DAAT {
             //next = (fileChannelDict.size()/68) + 1;
             next = (documentIndex_raf.getChannel().size() / 36) + 1;
 
-/*
-            for (int i = 0; i < listTermQuery.size(); i++) {
-                if (listTermQuery.get(i).getPl().get(current_pos_pl.get(i)).getDocID() == current_docid) {
-                    score += BM25(listTermQuery.get(i).getPl().get(current_pos_pl.get(i)).getTermFrequency(), lengthCurrentDocid, this.averageLengthDoc, (double) (fileChannelDocIndex.size() - 8) / 36, listTermQuery.get(i).getPl().size());
+
+            for (int i = 0; i < plQueryTerm.size(); i++) {
+                if (plQueryTerm.get(i).getPl().get(current_pos_pl.get(i)).getDocID() == current_docid) {
+                    score += BM25(plQueryTerm.get(i).getPl().get(current_pos_pl.get(i)).getTermFrequency(), lengthCurrentDocid, this.averageLengthDoc, (double) (fileChannelDocIndex.size() - 8) / 36, listTermQuery.get(i).getPl().size());
                     current_pos_pl.set(i, current_pos_pl.get(i) + 1);
                 }
                 // Se ho finito i posting all'interno della posting list devo proseguire senza scorrere
-                if (listTermQuery.get(i).getPl().size() - 1 < current_pos_pl.get(i))
+                if (plQueryTerm.get(i).getPl().size() - 1 < current_pos_pl.get(i))
                     continue;
 
                 // Altrimenti scorro e lo confronto con il valore di next
-                if (listTermQuery.get(i).getPl().get(current_pos_pl.get(i)).getDocID() < next) {
-                    next = listTermQuery.get(i).getPl().get(current_pos_pl.get(i)).getDocID();
+                if (plQueryTerm.get(i).getPl().get(current_pos_pl.get(i)).getDocID() < next) {
+                    next = plQueryTerm.get(i).getPl().get(current_pos_pl.get(i)).getDocID();
                 }
             }
 
-            ds = new Document_Score(current_docid, score);
+            ds = new DocumentScore(current_docid, score);
             pQueue.add(ds);
             if (current_docid == next)
                 break;
             current_docid = next;
 
-            */
+
         }
 
 
 
         //return pQueue;
-    }
+    } */
 }
