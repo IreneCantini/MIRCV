@@ -1,9 +1,6 @@
 package it.unipi.dii.aide.mircv.index;
 
-import it.unipi.dii.aide.mircv.common.data_structures.DictionaryElem;
-import it.unipi.dii.aide.mircv.common.data_structures.Posting;
-import it.unipi.dii.aide.mircv.common.data_structures.PostingList;
-import it.unipi.dii.aide.mircv.common.data_structures.SkippingElem;
+import it.unipi.dii.aide.mircv.common.data_structures.*;
 import it.unipi.dii.aide.mircv.common.data_structures.min_heap.ComparatorTerm;
 import it.unipi.dii.aide.mircv.common.data_structures.min_heap.OrderedList;
 
@@ -22,7 +19,7 @@ import static java.lang.Math.min;
 public class Merger {
     private static final long[] currentOffsetDictionary = new long[SPIMI.block_number+1];
 
-    public static void executeMerge(Boolean flag_compression) throws IOException, InterruptedException {
+    public static void executeMerge() throws IOException, InterruptedException {
         DictionaryElem current_dict_elem = new DictionaryElem();
 
         DictionaryElem previous_dict_elem = new DictionaryElem();
@@ -126,7 +123,7 @@ public class Merger {
                         //update the len of the skip field of the dictionary elem
                         previous_dict_elem.incSkipInfo_len();
 
-                        if (!flag_compression) {
+                        if (!Flags.isCompression_flag()) {
                             //write posting list to final files
                             temp.writePostingListToDisk(arrSkipInfo.get(arrSkipInfo.size()-1), previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
                         } else {
@@ -141,7 +138,7 @@ public class Merger {
                     arrSkipInfo.clear();
                 }
                 else{
-                    if (!flag_compression) {
+                    if (!Flags.isCompression_flag()) {
                         //write posting list to final files
                         previous_pl.writePostingListToDisk(null, previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
                     } else {

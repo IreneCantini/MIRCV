@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.common.text_preprocessing;
 
+        import it.unipi.dii.aide.mircv.common.data_structures.Flags;
         import org.tartarus.snowball.ext.PorterStemmer;
 
         import java.io.*;
@@ -87,7 +88,7 @@ public class TextPreprocesser {
         return tokens;
     }
 
-    public static ArrayList<String> executeTextPreprocessing(String line, boolean flag) throws IOException {
+    public static ArrayList<String> executeTextPreprocessing(String line) throws IOException {
 
         ArrayList<String> tokens = new ArrayList<>();
 
@@ -97,13 +98,11 @@ public class TextPreprocesser {
         //Tokenize
         tokens = tokenizeLine(line);
 
-        //remove stopwords (checking the flag)
-        if(flag == true)
+        //remove stopwords and perform stemming
+        if(Flags.isFilter_flag()) {
             tokens = removeStopwords(tokens);
-
-        //perform stemming
-        if(flag == true)
             tokens = stemmingToken(tokens);
+        }
 
         return tokens;
 

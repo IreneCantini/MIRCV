@@ -218,6 +218,10 @@ public class PostingList {
         }
 
         // Prelevamento della posting list con docID e Freq
-        readCompressedPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+        if(!Flags.isCompression_flag()){
+            readPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+        }else {
+            readCompressedPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+        }
     }
 }

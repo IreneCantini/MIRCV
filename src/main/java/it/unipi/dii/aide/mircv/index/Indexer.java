@@ -1,9 +1,6 @@
 package it.unipi.dii.aide.mircv.index;
 
-import it.unipi.dii.aide.mircv.common.data_structures.DictionaryElem;
-import it.unipi.dii.aide.mircv.common.data_structures.DocumentIndexElem;
-import it.unipi.dii.aide.mircv.common.data_structures.Posting;
-import it.unipi.dii.aide.mircv.common.data_structures.PostingList;
+import it.unipi.dii.aide.mircv.common.data_structures.*;
 import it.unipi.dii.aide.mircv.common.file_management.FileUtils;
 import it.unipi.dii.aide.mircv.index.utils.IndexUtils;
 
@@ -18,7 +15,10 @@ public class Indexer {
 
 
         long start = System.currentTimeMillis();
-        SPIMI.executeSPIMI("src/main/resources/collection_prova.tsv", true); //false: unfiltered, true: filtered
+        Flags.setCompression_flag(true);
+        Flags.setFilter_flag(true);
+        Flags.setMaxScore_flag(false);
+        SPIMI.executeSPIMI("src/main/resources/collection_prova.tsv"); //false: unfiltered, true: filtered
         System.out.println("COSTRUZIONE INVERTED INDEX COMPLETATA");
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;

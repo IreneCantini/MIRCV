@@ -38,7 +38,7 @@ public class SPIMI {
     //average document length variable
     public static double avdl=0;
 
-    public static void executeSPIMI(String path_collection, boolean mode) throws IOException, InterruptedException {
+    public static void executeSPIMI(String path_collection) throws IOException, InterruptedException {
         //docid counter
         int freq;
         long docid = 0;
@@ -55,7 +55,7 @@ public class SPIMI {
         String line = reader.readLine();
 
         while (line != null) {
-            tokens = TextPreprocesser.executeTextPreprocessing(line, mode);
+            tokens = TextPreprocesser.executeTextPreprocessing(line);
 
             docid = docid + 1;
             docNo=tokens.get(0);
@@ -143,7 +143,7 @@ public class SPIMI {
         System.out.println("OPERAZIONE DI MERGING IN CORSO");
         long start = System.currentTimeMillis();
 
-        Merger.executeMerge(true);
+        Merger.executeMerge();
 
         System.out.println("OPERAZIONE DI MERGING COMPLETATA");
 
