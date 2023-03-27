@@ -44,6 +44,7 @@ public class SPIMI {
         long docid = 0;
         String docNo;
         DocumentIndexElem doc_elem;
+        ArrayList<String> tokens;
 
         FileUtils.createDocIndexFile();
 
@@ -54,7 +55,6 @@ public class SPIMI {
         String line = reader.readLine();
 
         while (line != null) {
-            ArrayList<String> tokens;
             tokens = TextPreprocesser.executeTextPreprocessing(line, mode);
 
             docid = docid + 1;
@@ -124,6 +124,7 @@ public class SPIMI {
                 System.out.printf("Pulizia della memoria completata, procedo con il nuovo blocco '%d'\n", block_number);
             }
             line = reader.readLine();
+            tokens.clear();
         }
 
         avdl=totdl/docid;

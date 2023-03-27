@@ -4,7 +4,7 @@ import it.unipi.dii.aide.mircv.common.data_structures.DictionaryElem;
 import it.unipi.dii.aide.mircv.common.data_structures.Posting;
 import it.unipi.dii.aide.mircv.common.data_structures.PostingList;
 import it.unipi.dii.aide.mircv.common.data_structures.SkippingElem;
-import it.unipi.dii.aide.mircv.common.data_structures.min_heap.Comparator;
+import it.unipi.dii.aide.mircv.common.data_structures.min_heap.ComparatorTerm;
 import it.unipi.dii.aide.mircv.common.data_structures.min_heap.OrderedList;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class Merger {
 
         boolean firstIteration = true;
 
-        PriorityQueue<OrderedList> pQueue = new PriorityQueue<>(SPIMI.block_number == 0 ? 1 : SPIMI.block_number, new Comparator());
+        PriorityQueue<OrderedList> pQueue = new PriorityQueue<>(SPIMI.block_number == 0 ? 1 : SPIMI.block_number, new ComparatorTerm());
 
         //create the final files and associate the file Channels to them
         createFinalFile();

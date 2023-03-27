@@ -2,12 +2,20 @@ package it.unipi.dii.aide.mircv.common.data_structures;
 
 import it.unipi.dii.aide.mircv.common.compression.Unary;
 import it.unipi.dii.aide.mircv.common.compression.VariableByte;
+import it.unipi.dii.aide.mircv.index.SPIMI;
+import it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Dictionary;
+
+import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
+import static it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils.dictionaryBinarySearch;
 
 public class PostingList {
     private String term;
@@ -194,5 +202,53 @@ public class PostingList {
         for(int i = 0; i< d_elem.getDocids_len()/8; i++){
             this.pl.add(new Posting(docsByteBuffer.getLong(), freqByteBuffer.getInt()));
         }
+    }
+
+    private void obtainPostingList(String term) throws IOException {
+        //RandomAccessFile to read postinglist
+        RandomAccessFile pl_docId_raf = new RandomAccessFile(new File(PATH_TO_DOCIDS_POSTINGLIST), "r");
+        RandomAccessFile pl_freq_raf = new RandomAccessFile(new File(PATH_TO_FREQ_POSTINGLIST), "r");
+
+        // Arraylist di appoggio
+        ArrayList<Long> pldoc=new ArrayList<>();
+        ArrayList<Integer> plfreq=new ArrayList<>();
+
+        // Nuovo elemento dell'array ListTermQuery
+        //PostingList elem=new PostingList(term);
+        this.term=term;
+
+        // Ricerca nel dizionario delle informazioni relative al termine
+        DictionaryElem d = dictionaryBinarySearch(term);
+        if (d == null)
+        {
+            System.out.println("Termine non presente");
+            return;
+        }
+
+        // Prelevamento della posting list con docID e Freq
+        readPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+/*
+        if (mappedByteBuffer != null) {
+            byte[] arr = new byte[mappedByteBuffer.remaining()];
+            mappedByteBuffer.get(arr);
+            pldoc = obj_c.fromVariableByteToLong(arr);
+            //System.out.println("docII:" + pldoc.toString());
+        }
+
+        mappedByteBuffer = fileChannelII_freq.map(FileChannel.MapMode.READ_ONLY, d.getOffset_start_freq(), d.getLenghtPostingList_freq());
+
+        if (mappedByteBuffer != null) {
+            byte[] arr = new byte[mappedByteBuffer.remaining()];
+            mappedByteBuffer.get(arr);
+            plfreq = obj_c.fromUnaryToInt(arr);
+            //System.out.println("freqII:" + plfreq.toString());
+        }
+
+        elem.addPosting(pldoc, plfreq);
+
+        this.listTermQuery.add(elem);
+
+ */
+
     }
 }

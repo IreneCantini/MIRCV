@@ -8,13 +8,15 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Dictionary;
 
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.RandomAccessFile_map;
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.doc_raf;
 
 public class QueryUtils {
 
-    private DictionaryElem dictionaryBinarySearch(String term) throws IOException {
+    public static DictionaryElem dictionaryBinarySearch(String term) throws IOException {
 
         // Variabili per mantenere gli estremi della ricerca e la posizione centrale
         long low = 0;
