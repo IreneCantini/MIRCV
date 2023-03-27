@@ -204,18 +204,10 @@ public class PostingList {
         }
     }
 
-    private void obtainPostingList(String term) throws IOException {
+    public void obtainPostingList(String term) throws IOException {
         //RandomAccessFile to read postinglist
-        RandomAccessFile pl_docId_raf = new RandomAccessFile(new File(PATH_TO_DOCIDS_POSTINGLIST), "r");
-        RandomAccessFile pl_freq_raf = new RandomAccessFile(new File(PATH_TO_FREQ_POSTINGLIST), "r");
-
-        // Arraylist di appoggio
-        ArrayList<Long> pldoc=new ArrayList<>();
-        ArrayList<Integer> plfreq=new ArrayList<>();
-
-        // Nuovo elemento dell'array ListTermQuery
-        //PostingList elem=new PostingList(term);
-        this.term=term;
+        RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
+        RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
 
         // Ricerca nel dizionario delle informazioni relative al termine
         DictionaryElem d = dictionaryBinarySearch(term);
@@ -226,29 +218,6 @@ public class PostingList {
         }
 
         // Prelevamento della posting list con docID e Freq
-        readPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
-/*
-        if (mappedByteBuffer != null) {
-            byte[] arr = new byte[mappedByteBuffer.remaining()];
-            mappedByteBuffer.get(arr);
-            pldoc = obj_c.fromVariableByteToLong(arr);
-            //System.out.println("docII:" + pldoc.toString());
-        }
-
-        mappedByteBuffer = fileChannelII_freq.map(FileChannel.MapMode.READ_ONLY, d.getOffset_start_freq(), d.getLenghtPostingList_freq());
-
-        if (mappedByteBuffer != null) {
-            byte[] arr = new byte[mappedByteBuffer.remaining()];
-            mappedByteBuffer.get(arr);
-            plfreq = obj_c.fromUnaryToInt(arr);
-            //System.out.println("freqII:" + plfreq.toString());
-        }
-
-        elem.addPosting(pldoc, plfreq);
-
-        this.listTermQuery.add(elem);
-
- */
-
+        readCompressedPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
     }
 }

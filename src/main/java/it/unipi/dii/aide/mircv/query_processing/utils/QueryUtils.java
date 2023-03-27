@@ -2,6 +2,7 @@ package it.unipi.dii.aide.mircv.query_processing.utils;
 
 import it.unipi.dii.aide.mircv.common.data_structures.DictionaryElem;
 import it.unipi.dii.aide.mircv.common.data_structures.DocumentIndexElem;
+import it.unipi.dii.aide.mircv.common.data_structures.PostingList;
 import it.unipi.dii.aide.mircv.index.SPIMI;
 
 import java.io.IOException;
@@ -9,10 +10,12 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.RandomAccessFile_map;
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.doc_raf;
+import static it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser.plQueryTerm;
 
 public class QueryUtils {
 
@@ -58,7 +61,7 @@ public class QueryUtils {
         }
         return null;
     }
-    private DocumentIndexElem documentBinarySearch(long docID) throws IOException {
+    public static DocumentIndexElem documentBinarySearch(long docID) throws IOException {
 
         // Variabili per mantenere gli estremi della ricerca e la posizione centrale
         long low = 0;
@@ -96,5 +99,15 @@ public class QueryUtils {
             }
         }
         return null;
+    }
+
+    public static long minimumDocID(){
+        ArrayList<Long> docid_candidate = new ArrayList<Long>();
+
+        for(PostingList pl: plQueryTerm){
+            docid_candidate.add(pl.getPl().get(0).getDocID());
+        }
+
+        return Collections.min(docid_candidate);
     }
 }
