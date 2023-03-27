@@ -319,6 +319,6 @@ public class DictionaryElem {
         this.setSkipInfo_len(buffer.getInt());
         this.setIdf(buffer.getDouble());
         this.setMaxTFIDF(buffer.getDouble());
-        this.setMaxBM25(buffer.getLong());
+        this.setMaxBM25(buffer.getDouble());
     }
 }
