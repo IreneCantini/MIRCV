@@ -23,7 +23,7 @@ public class Flags {
     }
 
     public static boolean isCompression_flag() {
-        return compression_flag;
+        return !compression_flag;
     }
 
     public static boolean isFilter_flag() {

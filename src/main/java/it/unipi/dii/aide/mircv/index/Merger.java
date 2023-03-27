@@ -123,7 +123,7 @@ public class Merger {
                         //update the len of the skip field of the dictionary elem
                         previous_dict_elem.incSkipInfo_len();
 
-                        if (!Flags.isCompression_flag()) {
+                        if (Flags.isCompression_flag()) {
                             //write posting list to final files
                             temp.writePostingListToDisk(arrSkipInfo.get(arrSkipInfo.size()-1), previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
                         } else {
@@ -138,7 +138,7 @@ public class Merger {
                     arrSkipInfo.clear();
                 }
                 else{
-                    if (!Flags.isCompression_flag()) {
+                    if (Flags.isCompression_flag()) {
                         //write posting list to final files
                         previous_pl.writePostingListToDisk(null, previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
                     } else {

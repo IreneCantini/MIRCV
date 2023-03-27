@@ -2,17 +2,12 @@ package it.unipi.dii.aide.mircv.common.data_structures;
 
 import it.unipi.dii.aide.mircv.common.compression.Unary;
 import it.unipi.dii.aide.mircv.common.compression.VariableByte;
-import it.unipi.dii.aide.mircv.index.SPIMI;
-import it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Dictionary;
 
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
 import static it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils.dictionaryBinarySearch;
@@ -218,7 +213,7 @@ public class PostingList {
         }
 
         // Prelevamento della posting list con docID e Freq
-        if(!Flags.isCompression_flag()){
+        if(Flags.isCompression_flag()){
             readPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
         }else {
             readCompressedPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
