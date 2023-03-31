@@ -22,6 +22,6 @@ public class QueryPreprocesser {
             pl.getPl().clear();
         }
 
-        executeDAAT(10);
+        executeDAAT(10, true);
     }
 }

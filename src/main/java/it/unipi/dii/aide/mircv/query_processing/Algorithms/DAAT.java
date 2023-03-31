@@ -4,6 +4,7 @@ import it.unipi.dii.aide.mircv.common.data_structures.DocumentIndexElem;
 import it.unipi.dii.aide.mircv.query_processing.document_score.ComparatorScore;
 import it.unipi.dii.aide.mircv.query_processing.document_score.DocumentScore;
 import it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils;
+import it.unipi.dii.aide.mircv.query_processing.utils.Score;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +21,7 @@ import static it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils.minimumD
 
 public class DAAT {
 
-  /*  public static PriorityQueue<DocumentScore> executeDAAT(int k) throws IOException {
+    public static PriorityQueue<DocumentScore> executeDAAT(int k, boolean score_mode) throws IOException {
 
         // RandomAccessFile to read the document index
         RandomAccessFile documentIndex_raf = new RandomAccessFile(PATH_TO_DOCUMENT_INDEX, "r");
@@ -39,13 +40,13 @@ public class DAAT {
         // Variabili di appoggio
         DocumentScore ds;
 
-        DocumentIndexElem docElem=new DocumentIndexElem();
+        //DocumentIndexElem docElem=new DocumentIndexElem();
 
         long current_docid = minimumDocID(); // Prendo il docId più piccolo tra quelli contenuti all'interno delle
         // posting list dei termini della query
         //Ciclo fino a quando non ho finito di analizzare tutti i documenti delle posting list
         while(true) {
-            docElem = documentBinarySearch(current_docid);
+            //docElem = documentBinarySearch(current_docid);
 
             score = 0;
             //next = (fileChannelDict.size()/68) + 1;
@@ -54,7 +55,11 @@ public class DAAT {
 
             for (int i = 0; i < plQueryTerm.size(); i++) {
                 if (plQueryTerm.get(i).getPl().get(current_pos_pl.get(i)).getDocID() == current_docid) {
-                    score += BM25(plQueryTerm.get(i).getPl().get(current_pos_pl.get(i)).getTermFrequency(), lengthCurrentDocid, this.averageLengthDoc, (double) (fileChannelDocIndex.size() - 8) / 36, listTermQuery.get(i).getPl().size());
+
+                    if(score_mode)
+                        score += Score.BM25(plQueryTerm.get(i).getTerm(), plQueryTerm.get(i).getPl().get(i), 1.2, 0.75);
+                    else
+                        score += Score.TFIDF(plQueryTerm.get(i).getTerm(), plQueryTerm.get(i).getPl().get(i));
                     current_pos_pl.set(i, current_pos_pl.get(i) + 1);
                 }
                 // Se ho finito i posting all'interno della posting list devo proseguire senza scorrere
@@ -76,8 +81,6 @@ public class DAAT {
 
         }
 
-
-
-        //return pQueue;
-    } */
+        return pQueue;
+    }
 }
