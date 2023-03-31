@@ -61,4 +61,11 @@ public class CollectionInfo {
         docid_counter = docIndexBuffer.getLong();
         total_doc_len = docIndexBuffer.getLong();
     }
+
+    public static void printCollectionInfo() throws IOException {
+        readCollectionInfoToDisk();
+
+        System.out.println("Numero totale di docid: " + docid_counter + ", Lunghezza Collection: " + total_doc_len);
+
+    }
 }
