@@ -95,4 +95,13 @@ public class Flags {
 
         maxScore_flag = FlagsBuffer.getInt() == 1;
     }
+
+    public static void printFlag() throws IOException {
+
+        readFlagsFromDisk();
+
+        System.out.println("Compression flag: " + compression_flag +
+                            "\nFilter flag: " + filter_flag +
+                            "\nMaxScore flag: " + maxScore_flag);
+    }
 }
