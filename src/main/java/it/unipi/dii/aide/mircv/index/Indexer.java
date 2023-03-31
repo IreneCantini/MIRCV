@@ -27,9 +27,9 @@ public class Indexer {
 
 
 
+        //Flags.printFlag();
 
-
-        IndexUtils.printInvertedIndex(true);
+        //IndexUtils.printInvertedIndex(true);
 
         //IndexUtils.printSkipping();
 

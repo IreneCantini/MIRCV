@@ -47,7 +47,7 @@ public class QueryUtils {
             }
 
             //System.out.println("Termine letto:" + d.getTerm());
-            temp = d.getTerm().replaceAll("\\s", "");
+            temp = d.getTerm().replaceAll("\\s", "").trim();
 
             if (temp.compareTo(term) < 0) {
                 low = mid + 1;
@@ -69,7 +69,7 @@ public class QueryUtils {
 
         // Variabili per mantenere gli estremi della ricerca e la posizione centrale
         long low = 0;
-        long high = (doc_raf.getChannel().size()-8 )/ 36; // Mantiene quanti documenti sono presenti nel document index
+        long high = (doc_raf.getChannel().size())/ 36; // Mantiene quanti documenti sono presenti nel document index
         long mid;
 
         // Variabili di appoggio temporaneo
@@ -85,7 +85,7 @@ public class QueryUtils {
             mid = (low + high) / 2;
 
             // get term
-            mappedByteBuffer = doc_raf.getChannel().map(FileChannel.MapMode.READ_ONLY, mid*36, 8);
+            mappedByteBuffer = doc_raf.getChannel().map(FileChannel.MapMode.READ_ONLY, (mid*36) + 20, 8);
 
             if (mappedByteBuffer != null) {
                 d.setDocId(mappedByteBuffer.getLong());

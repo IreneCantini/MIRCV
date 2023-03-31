@@ -22,8 +22,8 @@ public class Main {
 
         String query;
         ArrayList<String> tokens;
-        while(true)
-        {
+        
+        while(true) {
             query = sc.nextLine();
 
             if(query==null || query.isEmpty()){
@@ -41,7 +41,5 @@ public class Main {
             QueryPreprocesser.executeQueryProcesser(tokens);
 
         }
-
-
     }
 }

@@ -14,14 +14,18 @@ public class QueryPreprocesser {
     public static ArrayList<PostingList> plQueryTerm;
 
     public static void executeQueryProcesser(ArrayList<String> tokens) throws IOException, InterruptedException {
-        PostingList pl=new PostingList();
+
+        plQueryTerm = new ArrayList<PostingList>();
         for(String t: tokens){
+            PostingList pl=new PostingList();
+            pl.getPl().clear();
             pl.setTerm(t);
             pl.obtainPostingList(t);
             plQueryTerm.add(pl);
-            pl.getPl().clear();
         }
 
         executeDAAT(10, true);
     }
+
+
 }
