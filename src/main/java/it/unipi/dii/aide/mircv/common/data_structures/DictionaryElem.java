@@ -2,6 +2,8 @@ package it.unipi.dii.aide.mircv.common.data_structures;
 
 import it.unipi.dii.aide.mircv.index.SPIMI;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -289,6 +291,19 @@ public class DictionaryElem {
             dictFileChannel.write(buffer);
         }
     }
+
+    public void writeDictionaryElemDebugModeToDisk(FileChannel dictFileChannel) throws IOException {
+        String dictionary_elem_string = "Term: " + this.term + " df: " + this.df + " cf: " + this.cf + " docids_offset: " + this.offset_docids +
+                " docids_len: " + this.docids_len + " freqs_offset: " + this.offset_tf + " freqs_len: " + " maxTf: " + this.maxTf + this.tf_len + "skip_offset: " +
+                this.offset_skipInfo + " skip_len: " + this.skipInfo_len + " idf: " + this.idf + " maxTFIDF: " + this.maxTFIDF + " maxBM25: " +
+                this.maxBM25;
+
+        BufferedWriter disk_writer = new BufferedWriter(new FileWriter("src/main/resources/Debug/vocabulary_debug.txt", true));
+        disk_writer.write(dictionary_elem_string);
+        disk_writer.close();
+
+    }
+
 
     public void readDictionaryElemFromDisk(long start_position, FileChannel dictFchannel) throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(20);
