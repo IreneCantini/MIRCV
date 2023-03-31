@@ -2,6 +2,8 @@ package it.unipi.dii.aide.mircv.common.data_structures;
 
 import it.unipi.dii.aide.mircv.common.file_management.FileUtils;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -21,6 +23,9 @@ public class Flags {
     //flag for checking if the max score algorithm is enabled
     private static boolean maxScore_flag;
 
+    //flag for checking if the debug mode is enabled
+    private static boolean debug_flag;
+
     public static void setCompression_flag(boolean compression_flag) {
         Flags.compression_flag = compression_flag;
     }
@@ -31,6 +36,10 @@ public class Flags {
 
     public static void setMaxScore_flag(boolean maxScore_flag) {
         Flags.maxScore_flag = maxScore_flag;
+    }
+
+    public static void setDebug_flag(boolean debug_flag) {
+        Flags.debug_flag = debug_flag;
     }
 
     public static boolean isCompression_flag() {
@@ -45,8 +54,12 @@ public class Flags {
         return maxScore_flag;
     }
 
+    public static boolean isDebug_flag() {
+        return debug_flag;
+    }
+
     public static void writeFlagToDisk() throws IOException {
-        ByteBuffer FlagsBuffer = ByteBuffer.allocate(12);
+        ByteBuffer FlagsBuffer = ByteBuffer.allocate(16);
         Flags_raf.getChannel().position(0);
 
 
@@ -66,6 +79,11 @@ public class Flags {
         else
             FlagsBuffer.putInt(0);
 
+        if(debug_flag)
+            FlagsBuffer.putInt(1);
+        else
+            FlagsBuffer.putInt(0);
+
 
         FlagsBuffer = ByteBuffer.wrap(FlagsBuffer.array());
 
@@ -74,11 +92,23 @@ public class Flags {
         }
     }
 
+    public static void writeFlagDebugModeToDisk() throws IOException {
+        String flag_string = "Compression flag: " + compression_flag +
+                ", Filter flag: " + filter_flag +
+                ", MaxScore flag: " + maxScore_flag +
+                ", Debug flag: " + debug_flag;
+
+        BufferedWriter disk_writer = new BufferedWriter(new FileWriter("src/main/resources/Debug/flags_debug.txt", true));
+        disk_writer.write(flag_string);
+        disk_writer.close();
+    }
+
+
     public static void readFlagsFromDisk() throws IOException {
         //retrieve file channel
         Flags_raf = new RandomAccessFile(PATH_TO_FLAGS_FILE, "r");
 
-        ByteBuffer FlagsBuffer = ByteBuffer.allocate(12);
+        ByteBuffer FlagsBuffer = ByteBuffer.allocate(16);
 
         Flags_raf.getChannel().position(0);
 
@@ -94,6 +124,8 @@ public class Flags {
         filter_flag = FlagsBuffer.getInt() == 1;
 
         maxScore_flag = FlagsBuffer.getInt() == 1;
+
+        debug_flag = FlagsBuffer.getInt() == 1;
     }
 
     public static void printFlag() throws IOException {
@@ -102,6 +134,7 @@ public class Flags {
 
         System.out.println("Compression flag: " + compression_flag +
                             "\nFilter flag: " + filter_flag +
-                            "\nMaxScore flag: " + maxScore_flag);
+                            "\nMaxScore flag: " + maxScore_flag +
+                            "\nDebug flag: " + debug_flag);
     }
 }

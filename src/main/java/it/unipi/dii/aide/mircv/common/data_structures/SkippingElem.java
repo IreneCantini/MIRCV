@@ -1,5 +1,7 @@
 package it.unipi.dii.aide.mircv.common.data_structures;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -88,6 +90,15 @@ public class SkippingElem{
         }
     }
 
+    public void writeSkippingElemDebugModeToDisk() throws IOException {
+        String skipping_string = "docID: " + this.docID + ", offset_docId: " + this.offset_docId + ", block_docId_len: " + this.block_docId_len +
+                ", offset_freq: " + this.offset_freq + ", block_freq_len: " + this.block_freq_len + "\n";
+
+        BufferedWriter disk_writer = new BufferedWriter(new FileWriter("src/main/resources/Debug/skipping_debug.txt", true));
+        disk_writer.write(skipping_string);
+        disk_writer.close();
+    }
+
     public void readSkippingElemFromDisk(int start_position, FileChannel skipFileChannel) throws IOException {
         ByteBuffer skipInfoBuffer = ByteBuffer.allocate(32);
 
@@ -108,7 +119,9 @@ public class SkippingElem{
     public static void writeArraySkippingElemToDisk(ArrayList<SkippingElem> skip_array, FileChannel skipFileChannel) throws IOException {
         for(SkippingElem skip_elem: skip_array){
             skip_elem.writeSkippingElemToDisk(skipFileChannel);
+            skip_elem.writeSkippingElemDebugModeToDisk();
         }
+
     }
 
     public void printSkippingElem() {

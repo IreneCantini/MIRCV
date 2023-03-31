@@ -76,7 +76,6 @@ public class DocumentIndexElem {
             docIndexFileChannel.write(docIndexBuffer);
         }
     }
-
     public void readDocumentIndexElemFromDisk(int start_position, FileChannel docIndexFileChannel) throws IOException {
         ByteBuffer docIndexBuffer = ByteBuffer.allocate(20);
 

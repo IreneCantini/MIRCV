@@ -1,8 +1,6 @@
 package it.unipi.dii.aide.mircv.common.data_structures;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
@@ -44,6 +42,15 @@ public class CollectionInfo {
         while(docIndexBuffer.hasRemaining()) {
             CollectionInfo_raf.getChannel().write(docIndexBuffer);
         }
+    }
+
+    public static void writeCollectionInfoDebugModeToDisk() throws IOException {
+
+        String collection_info_string = "Totale docid: " + docid_counter + ", Collection length: " + total_doc_len;
+
+        BufferedWriter disk_writer = new BufferedWriter(new FileWriter("src/main/resources/Debug/collection_info_debug.txt", true));
+        disk_writer.write(collection_info_string);
+        disk_writer.close();
     }
 
     public static void readCollectionInfoToDisk() throws IOException {

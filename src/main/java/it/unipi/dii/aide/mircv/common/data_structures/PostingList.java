@@ -3,6 +3,8 @@ package it.unipi.dii.aide.mircv.common.data_structures;
 import it.unipi.dii.aide.mircv.common.compression.Unary;
 import it.unipi.dii.aide.mircv.common.compression.VariableByte;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -138,6 +140,28 @@ public class PostingList {
             skip_elem.setBlock_docId_len(docidsCompressed.length);
             skip_elem.setBlock_freq_len(freqsCompressed.length);
         }
+    }
+
+    public void writePostingListDebugMode() throws IOException {
+        boolean first_posting = true;
+
+        String pl_string = this.term + " ->";
+
+
+        for (Posting p : this.pl) {
+            if(first_posting) {
+                pl_string = pl_string + " " + p.getDocID() + ", " + p.getTermFrequency();
+                first_posting = false;
+            }else {
+                pl_string = pl_string + " - " + p.getDocID() + ", " + p.getTermFrequency();
+            }
+        }
+
+        pl_string = pl_string + "\n";
+
+        BufferedWriter disk_writer = new BufferedWriter(new FileWriter("src/main/resources/Debug/posting_lists_debug.txt", true));
+        disk_writer.write(pl_string);
+        disk_writer.close();
     }
 
     public void readCompressedPostingListFromDisk(DictionaryElem d_elem,FileChannel docidsFchannel, FileChannel freqsFchannel) throws IOException {

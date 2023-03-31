@@ -152,9 +152,11 @@ public class SPIMI {
         CollectionInfo.setTotal_doc_len((long)totdl);
         CollectionInfo.setDocid_counter(docid);
         CollectionInfo.writeCollectionInfoToDisk();
+        CollectionInfo.writeCollectionInfoDebugModeToDisk();
 
         //write the Flags to disk
         Flags.writeFlagToDisk();
+        Flags.writeFlagDebugModeToDisk();
 
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;

@@ -145,6 +145,8 @@ public class Merger {
                         //write the compressed posting list
                         previous_pl.writeCompressedPostingListToDisk(null, previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
                     }
+
+                    previous_pl.writePostingListDebugMode();
                 }
 
                 //write dictionary to final file
