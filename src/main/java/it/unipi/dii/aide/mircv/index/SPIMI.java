@@ -5,11 +5,11 @@ import it.unipi.dii.aide.mircv.common.text_preprocessing.TextPreprocesser;
 import it.unipi.dii.aide.mircv.common.data_structures.*;
 import it.unipi.dii.aide.mircv.index.utils.IndexUtils;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.collection_length;
@@ -65,6 +65,7 @@ public class SPIMI {
             Document_index_map.put(docid, (long)tokens.size());
             totdl+=tokens.size();
             doc_elem.writeDocIndexElemToDisk(doc_raf.getChannel());
+            doc_elem.writeDocumentElemDebugModeToDisk();
 
             for (String term : tokens) {
                 freq = Collections.frequency(tokens, term);
@@ -158,5 +159,19 @@ public class SPIMI {
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;
         System.out.println("Merge operation executed in: " + time + " minutes");
+    }
+
+    public void debugWriteToDisk(String path) throws IOException {
+
+        Path dirPath = Paths.get("data/debug");
+        Files.createDirectories(dirPath);
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("data/debug/"+path, true));
+            writer.write(this.toString()+"\n");
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

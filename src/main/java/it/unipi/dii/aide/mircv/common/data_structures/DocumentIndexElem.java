@@ -1,5 +1,7 @@
 package it.unipi.dii.aide.mircv.common.data_structures;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -95,5 +97,13 @@ public class DocumentIndexElem {
         docIndexBuffer.rewind();
         this.setDocId(docIndexBuffer.getLong());
         this.setLength(docIndexBuffer.getLong());
+    }
+
+    public void writeDocumentElemDebugModeToDisk() throws IOException {
+        String doc_elem_string = " Docno: " + this.docNo.trim() + " docID: " + this.docId + " length: " + this.length;
+
+        BufferedWriter disk_writer = new BufferedWriter(new FileWriter("src/main/resources/Debug/document_debug.txt", true));
+        disk_writer.write(doc_elem_string);
+        disk_writer.close();
     }
 }

@@ -292,9 +292,9 @@ public class DictionaryElem {
         }
     }
 
-    public void writeDictionaryElemDebugModeToDisk(FileChannel dictFileChannel) throws IOException {
+    public void writeDictionaryElemDebugModeToDisk() throws IOException {
         String dictionary_elem_string = "Term: " + this.term + " df: " + this.df + " cf: " + this.cf + " docids_offset: " + this.offset_docids +
-                " docids_len: " + this.docids_len + " freqs_offset: " + this.offset_tf + " freqs_len: " + " maxTf: " + this.maxTf + this.tf_len + "skip_offset: " +
+                " docids_len: " + this.docids_len + " freqs_offset: " + this.offset_tf + " freqs_len: " + " maxTf: " + this.maxTf + this.tf_len + " skip_offset: " +
                 this.offset_skipInfo + " skip_len: " + this.skipInfo_len + " idf: " + this.idf + " maxTFIDF: " + this.maxTFIDF + " maxBM25: " +
                 this.maxBM25;
 

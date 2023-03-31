@@ -149,7 +149,7 @@ public class Merger {
 
                 //write dictionary to final file
                 previous_dict_elem.writeDictionaryElemToDisk(RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel());
-                previous_dict_elem.writeDictionaryElemDebugModeToDisk(RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel());
+                previous_dict_elem.writeDictionaryElemDebugModeToDisk();
 
                 //update the offset of the final posting list files
                 current_dict_elem.setOffset_docids(RandomAccessFile_map.get(SPIMI.block_number+1).get(1).getChannel().size());
