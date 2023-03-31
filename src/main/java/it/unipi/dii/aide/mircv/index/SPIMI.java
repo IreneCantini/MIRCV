@@ -65,7 +65,8 @@ public class SPIMI {
             Document_index_map.put(docid, (long)tokens.size());
             totdl+=tokens.size();
             doc_elem.writeDocIndexElemToDisk(doc_raf.getChannel());
-            doc_elem.writeDocumentElemDebugModeToDisk();
+            if(Flags.isDebug_flag())
+                doc_elem.writeDocumentElemDebugModeToDisk();
 
             for (String term : tokens) {
                 freq = Collections.frequency(tokens, term);
@@ -152,11 +153,14 @@ public class SPIMI {
         CollectionInfo.setTotal_doc_len((long)totdl);
         CollectionInfo.setDocid_counter(docid);
         CollectionInfo.writeCollectionInfoToDisk();
-        CollectionInfo.writeCollectionInfoDebugModeToDisk();
 
         //write the Flags to disk
         Flags.writeFlagToDisk();
-        Flags.writeFlagDebugModeToDisk();
+
+        if(Flags.isDebug_flag()){
+            CollectionInfo.writeCollectionInfoDebugModeToDisk();
+            Flags.writeFlagDebugModeToDisk();
+        }
 
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;
