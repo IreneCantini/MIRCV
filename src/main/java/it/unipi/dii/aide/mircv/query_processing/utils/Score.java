@@ -20,9 +20,9 @@ public class Score {
         double avdl = (double)CollectionInfo.getTotal_doc_len()/CollectionInfo.getDocid_counter();
 
         //retrieve the document lenght of the docid
-        DocumentIndexElem d_elem = QueryUtils.documentBinarySearch(p.getDocID());
+        //DocumentIndexElem d_elem = QueryUtils.documentBinarySearch(p.getDocID());
 
-        return (tf/(k*((1-b) + (b*(d_elem.getLength()/avdl))) + tf))*idf;
+        return (tf/(k*((1-b) + (b*(DocumentIndex.Document_Index.get(p.getDocID()).getLength()/avdl))) + tf))*idf;
     }
 
     public static double TFIDF(String term, Posting p) throws IOException {
