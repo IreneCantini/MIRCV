@@ -13,11 +13,11 @@ import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
 public class Indexer {
     public static void main(String[] args) throws IOException, InterruptedException {
 
-
         long start = System.currentTimeMillis();
         Flags.setCompression_flag(true);
         Flags.setFilter_flag(true);
         Flags.setMaxScore_flag(false);
+        Flags.setDebug_flag(true);
         SPIMI.executeSPIMI("src/main/resources/collection_prova.tsv"); //false: unfiltered, true: filtered
         System.out.println("COSTRUZIONE INVERTED INDEX COMPLETATA");
         long end = System.currentTimeMillis() - start;

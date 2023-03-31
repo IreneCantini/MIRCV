@@ -145,13 +145,16 @@ public class Merger {
                         //write the compressed posting list
                         previous_pl.writeCompressedPostingListToDisk(null, previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
                     }
-
-                    previous_pl.writePostingListDebugMode();
                 }
 
                 //write dictionary to final file
                 previous_dict_elem.writeDictionaryElemToDisk(RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel());
-                previous_dict_elem.writeDictionaryElemDebugModeToDisk();
+
+                if(Flags.isDebug_flag()) {
+                    previous_pl.setTerm(previous_dict_elem.getTerm());
+                    previous_pl.writePostingListDebugMode();
+                    previous_dict_elem.writeDictionaryElemDebugModeToDisk();
+                }
 
                 //update the offset of the final posting list files
                 current_dict_elem.setOffset_docids(RandomAccessFile_map.get(SPIMI.block_number+1).get(1).getChannel().size());

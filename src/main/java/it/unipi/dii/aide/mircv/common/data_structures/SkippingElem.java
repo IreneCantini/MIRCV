@@ -119,7 +119,8 @@ public class SkippingElem{
     public static void writeArraySkippingElemToDisk(ArrayList<SkippingElem> skip_array, FileChannel skipFileChannel) throws IOException {
         for(SkippingElem skip_elem: skip_array){
             skip_elem.writeSkippingElemToDisk(skipFileChannel);
-            skip_elem.writeSkippingElemDebugModeToDisk();
+            if(Flags.isDebug_flag())
+                skip_elem.writeSkippingElemDebugModeToDisk();
         }
 
     }
