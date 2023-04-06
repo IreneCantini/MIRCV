@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.common.data_structures;
 
+import it.unipi.dii.aide.mircv.cli.utils.UploadDataStructures;
 import it.unipi.dii.aide.mircv.common.file_management.FileUtils;
 
 import java.io.BufferedWriter;
@@ -26,6 +27,9 @@ public class Flags {
     //flag for checking if the debug mode is enabled
     private static boolean debug_flag;
 
+    // true: BM25, false: TFIDF
+    private static boolean scoreMode= true;
+
     public static void setCompression_flag(boolean compression_flag) {
         Flags.compression_flag = compression_flag;
     }
@@ -33,6 +37,8 @@ public class Flags {
     public static void setFilter_flag(boolean filter_flag) {
         Flags.filter_flag = filter_flag;
     }
+
+    public static void setScoreMode(boolean scoreMode) {Flags.scoreMode = scoreMode;}
 
     public static void setMaxScore_flag(boolean maxScore_flag) {
         Flags.maxScore_flag = maxScore_flag;
@@ -45,6 +51,8 @@ public class Flags {
     public static boolean isCompression_flag() {
         return !compression_flag;
     }
+
+    public static boolean isScoreMode() {return scoreMode;}
 
     public static boolean isFilter_flag() {
         return filter_flag;
@@ -104,33 +112,11 @@ public class Flags {
     }
 
 
-    public static void readFlagsFromDisk() throws IOException {
-        //retrieve file channel
-        Flags_raf = new RandomAccessFile(PATH_TO_FLAGS_FILE, "r");
 
-        ByteBuffer FlagsBuffer = ByteBuffer.allocate(16);
-
-        Flags_raf.getChannel().position(0);
-
-
-        while (FlagsBuffer.hasRemaining()){
-            Flags_raf.getChannel().read(FlagsBuffer);
-        }
-
-        FlagsBuffer.rewind();
-
-        compression_flag = FlagsBuffer.getInt() == 1;
-
-        filter_flag = FlagsBuffer.getInt() == 1;
-
-        maxScore_flag = FlagsBuffer.getInt() == 1;
-
-        debug_flag = FlagsBuffer.getInt() == 1;
-    }
 
     public static void printFlag() throws IOException {
 
-        readFlagsFromDisk();
+        UploadDataStructures.readFlagsFromDisk();
 
         System.out.println("Compression flag: " + compression_flag +
                             "\nFilter flag: " + filter_flag +

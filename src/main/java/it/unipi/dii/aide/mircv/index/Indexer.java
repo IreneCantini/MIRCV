@@ -17,8 +17,8 @@ public class Indexer {
         Flags.setCompression_flag(true);
         Flags.setFilter_flag(true);
         Flags.setMaxScore_flag(false);
-        Flags.setDebug_flag(true);
-        SPIMI.executeSPIMI("src/main/resources/collection_prova.tsv"); //false: unfiltered, true: filtered
+        Flags.setDebug_flag(false);
+        SPIMI.executeSPIMI("src/main/resources/collection.tsv"); //false: unfiltered, true: filtered
         System.out.println("COSTRUZIONE INVERTED INDEX COMPLETATA");
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;

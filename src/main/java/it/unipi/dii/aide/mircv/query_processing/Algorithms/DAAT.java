@@ -1,6 +1,8 @@
 package it.unipi.dii.aide.mircv.query_processing.Algorithms;
 
+import it.unipi.dii.aide.mircv.cli.utils.UploadDataStructures;
 import it.unipi.dii.aide.mircv.common.data_structures.DocumentIndexElem;
+import it.unipi.dii.aide.mircv.common.data_structures.Flags;
 import it.unipi.dii.aide.mircv.query_processing.document_score.ComparatorScore;
 import it.unipi.dii.aide.mircv.query_processing.document_score.DocumentScore;
 import it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils;
@@ -13,18 +15,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.PriorityQueue;
 
-import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.PATH_TO_DOCIDS_POSTINGLIST;
-import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.PATH_TO_DOCUMENT_INDEX;
+import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
 import static it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser.plQueryTerm;
 import static it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils.documentBinarySearch;
 import static it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils.minimumDocID;
 
 public class DAAT {
 
-    public static PriorityQueue<DocumentScore> executeDAAT(int k, boolean score_mode) throws IOException {
-
-        // RandomAccessFile to read the document index
-        RandomAccessFile documentIndex_raf = new RandomAccessFile(PATH_TO_DOCUMENT_INDEX, "r");
+    public static PriorityQueue<DocumentScore> executeDAAT(int k) throws IOException {
 
         // Priority queue contenente docId e score
         PriorityQueue<DocumentScore> pQueue
@@ -49,14 +47,13 @@ public class DAAT {
             //docElem = documentBinarySearch(current_docid);
 
             score = 0;
-            //next = (fileChannelDict.size()/68) + 1;
-            next = (documentIndex_raf.getChannel().size() / 36) + 1;
+            next = (UploadDataStructures.Document_Index.size()) + 1;
 
 
             for (int i = 0; i < plQueryTerm.size(); i++) {
                 if (plQueryTerm.get(i).getPl().get(current_pos_pl.get(i)).getDocID() == current_docid) {
 
-                    if(score_mode)
+                    if(Flags.isScoreMode())
                         score += Score.BM25(plQueryTerm.get(i).getTerm(), plQueryTerm.get(i).getPl().get(i), 1.2, 0.75);
                     else
                         score += Score.TFIDF(plQueryTerm.get(i).getTerm(), plQueryTerm.get(i).getPl().get(i));

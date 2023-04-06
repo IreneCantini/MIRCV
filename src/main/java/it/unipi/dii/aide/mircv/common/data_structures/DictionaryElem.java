@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.collection_length;
 
+// #BYTES = 92
 public class DictionaryElem {
     private String term;
 

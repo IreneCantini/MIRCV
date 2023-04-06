@@ -1,7 +1,7 @@
 package it.unipi.dii.aide.mircv.cli;
 
+import it.unipi.dii.aide.mircv.cli.utils.UploadDataStructures;
 import it.unipi.dii.aide.mircv.common.data_structures.CollectionInfo;
-import it.unipi.dii.aide.mircv.common.data_structures.DocumentIndex;
 import it.unipi.dii.aide.mircv.common.data_structures.Flags;
 import it.unipi.dii.aide.mircv.common.text_preprocessing.TextPreprocesser;
 import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
@@ -11,15 +11,15 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
+
     public static void main(String[] args) throws IOException, InterruptedException {
         //retrieve Collection info
         CollectionInfo.readCollectionInfoToDisk();
 
-        //retrieve Flags info
-        Flags.readFlagsFromDisk();
-
-        //retrieve Document Index
-        DocumentIndex.readDocumentIndexFromDisk();
+        //retrieve data structures from disk
+        UploadDataStructures.readFlagsFromDisk();
+        UploadDataStructures.readDocumentIndexFromDisk();
+        UploadDataStructures.readDictionaryFromDisk();
 
         System.out.println("Write Query or 'exit' command to terminate: ");
         Scanner sc=new Scanner(System.in);

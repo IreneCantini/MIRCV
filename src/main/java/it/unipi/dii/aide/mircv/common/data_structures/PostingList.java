@@ -2,6 +2,7 @@ package it.unipi.dii.aide.mircv.common.data_structures;
 
 import it.unipi.dii.aide.mircv.common.compression.Unary;
 import it.unipi.dii.aide.mircv.common.compression.VariableByte;
+import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -241,6 +242,13 @@ public class PostingList {
             readPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
         }else {
             readCompressedPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+        }
+
+        if(Flags.isMaxScore_flag()){
+            if(Flags.isScoreMode())
+                QueryPreprocesser.score_hm.put(d.getMaxBM25(),this);
+            else
+                QueryPreprocesser.score_hm.put(d.getMaxTFIDF(),this);
         }
     }
 }
