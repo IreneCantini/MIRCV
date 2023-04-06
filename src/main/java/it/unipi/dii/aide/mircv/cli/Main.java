@@ -7,12 +7,25 @@ import it.unipi.dii.aide.mircv.common.text_preprocessing.TextPreprocesser;
 import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
 
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+        List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
+        list.sort(Map.Entry.comparingByValue());
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+
+        return result;
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
+
+        /*
         //retrieve Collection info
         CollectionInfo.readCollectionInfoToDisk();
 
@@ -44,6 +57,28 @@ public class Main {
 
             QueryPreprocesser.executeQueryProcesser(tokens);
 
+        }
+
+         */
+
+        ArrayList<Double> val;
+        HashMap<Integer, Double> prova=new HashMap<>();
+        prova.put(0, 2.4);
+        prova.put(1, 1.0);
+        prova.put(3, 2.4);
+        prova.put(4, 1.5);
+        prova.put(5, 1.7);
+        prova.put(6, 2.0);
+
+        prova= (HashMap<Integer, Double>) sortByValue(prova);
+        val=new ArrayList<>(prova.values());
+
+        for (Map.Entry<Integer, Double> entry: prova.entrySet()){
+            System.out.println("chiave: "+ entry.getKey() + ", valore: "+entry.getValue());
+        }
+
+        for(Double d:val){
+            System.out.println(d);
         }
     }
 }

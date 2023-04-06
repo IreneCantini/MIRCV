@@ -224,7 +224,7 @@ public class PostingList {
         }
     }
 
-    public void obtainPostingList(String term) throws IOException {
+    public void obtainPostingList(String term, double score) throws IOException {
         //RandomAccessFile to read postinglist
         RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
         RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
@@ -244,11 +244,10 @@ public class PostingList {
             readCompressedPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
         }
 
-        if(Flags.isMaxScore_flag()){
-            if(Flags.isScoreMode())
-                QueryPreprocesser.score_hm.put(d.getMaxBM25(),this);
-            else
-                QueryPreprocesser.score_hm.put(d.getMaxTFIDF(),this);
-        }
+        if(Flags.isScoreMode())
+            score = d.getMaxBM25();
+        else
+            score = d.getMaxTFIDF();
+
     }
 }

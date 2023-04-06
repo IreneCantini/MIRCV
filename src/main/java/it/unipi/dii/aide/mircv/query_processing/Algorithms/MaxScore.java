@@ -12,6 +12,7 @@ public class MaxScore {
 
     public static void executeMaxScore(int k){
 
+        /*
         ArrayList<Double> sortedMaxScore = new ArrayList<>(QueryPreprocesser.score_hm.keySet());
         Collections.sort(sortedMaxScore);
 
@@ -19,6 +20,8 @@ public class MaxScore {
                 = new PriorityQueue<>(k, new ComparatorScore());
 
         ArrayList<Double> ub= new ArrayList<>();
+
+         */
     }
 
 }
