@@ -36,7 +36,8 @@ public class UploadDataStructures {
 
         DictionaryElem d_elem = new DictionaryElem();
 
-        for(int i = 0; i< dic_raf.getChannel().size(); i+=92){
+        for(int i = 0; i < dic_raf.getChannel().size(); i+=92){
+            d_elem = new DictionaryElem();
             d_elem.readDictionaryElemFromDisk(i, dic_raf.getChannel());
             Dictionary.put(d_elem.getTerm(), d_elem);
         }
