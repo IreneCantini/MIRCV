@@ -157,27 +157,11 @@ public class SPIMI {
         //write the Flags to disk
         Flags.writeFlagToDisk();
 
-        if(Flags.isDebug_flag()){
+        if(Flags.isDebug_flag())
             CollectionInfo.writeCollectionInfoDebugModeToDisk();
-            Flags.writeFlagDebugModeToDisk();
-        }
 
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;
         System.out.println("Merge operation executed in: " + time + " minutes");
-    }
-
-    public void debugWriteToDisk(String path) throws IOException {
-
-        Path dirPath = Paths.get("data/debug");
-        Files.createDirectories(dirPath);
-
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("data/debug/"+path, true));
-            writer.write(this.toString()+"\n");
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

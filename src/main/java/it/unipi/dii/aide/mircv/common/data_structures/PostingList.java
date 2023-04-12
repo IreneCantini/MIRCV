@@ -146,7 +146,7 @@ public class PostingList {
     public void writePostingListDebugMode() throws IOException {
         boolean first_posting = true;
 
-        String pl_string = this.term + " ->";
+        String pl_string = this.getTerm().toString() + " ->";
 
 
         for (Posting p : this.pl) {

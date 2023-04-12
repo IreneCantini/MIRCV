@@ -8,6 +8,7 @@ import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -22,9 +23,10 @@ public class Main {
         UploadDataStructures.readDocumentIndexFromDisk();
         UploadDataStructures.readDictionaryFromDisk();
 
+        System.out.println("Last element: " + UploadDataStructures.Dictionary.get("project"));
+
         System.out.println("Write Query or 'exit' command to terminate: ");
         Scanner sc=new Scanner(System.in);
-
         String query;
         ArrayList<String> tokens;
         
@@ -41,10 +43,12 @@ public class Main {
 
             //flag = true to execute stemming
             //flag = false to not execute stemming
+            long start = System.currentTimeMillis();
             tokens = TextPreprocesser.executeTextPreprocessing(query);
 
             QueryPreprocesser.executeQueryProcesser(tokens);
-
+            long end = System.currentTimeMillis() - start;
+            System.out.println("Query executed in: " + end + " ms");
         }
 
 
