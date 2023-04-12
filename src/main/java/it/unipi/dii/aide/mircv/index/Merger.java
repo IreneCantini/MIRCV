@@ -86,6 +86,7 @@ public class Merger {
                 //initialize previous dictionary elem
                 previous_dict_elem = current_dict_elem;
                 previous_pl.getPl().addAll(current_pl.getPl());
+                previous_pl.setTerm(previous_dict_elem.getTerm());
                 firstIteration = false;
             }else if(current_dict_elem.getTerm().equals(previous_dict_elem.getTerm())) {
                 //update previous dictionary elem
@@ -104,7 +105,7 @@ public class Merger {
                 //firstly we are going to check if it is necessary to do skipping after that we are going to check the compression flag.
                 //if the flag compression is true it is necessary to do the compression before writing it on the disk
 
-                //set the len of the posting list to 0 for setting it with the final lenght of the merged posting list using the inc method
+                //set the len of the posting list to 0 for setting it with the final length of the merged posting list using the inc method
                 previous_dict_elem.setDocids_len(0);
                 previous_dict_elem.setTf_len(0);
                 previous_dict_elem.computeIdf();
@@ -136,8 +137,7 @@ public class Merger {
                     previous_dict_elem.setOffset_skipInfo(skippingBlock_raf.getChannel().size());
                     writeArraySkippingElemToDisk(arrSkipInfo, skippingBlock_raf.getChannel());
                     arrSkipInfo.clear();
-                }
-                else{
+                } else{
                     if (Flags.isCompression_flag()) {
                         //write posting list to final files
                         previous_pl.writePostingListToDisk(null, previous_dict_elem, RandomAccessFile_map.get(SPIMI.block_number + 1).get(1).getChannel(), RandomAccessFile_map.get(SPIMI.block_number + 1).get(2).getChannel());
@@ -150,11 +150,13 @@ public class Merger {
                 //write dictionary to final file
                 previous_dict_elem.writeDictionaryElemToDisk(RandomAccessFile_map.get(SPIMI.block_number+1).get(0).getChannel());
 
+
                 if(Flags.isDebug_flag()) {
                     previous_pl.setTerm(previous_dict_elem.getTerm());
                     previous_pl.writePostingListDebugMode();
                     previous_dict_elem.writeDictionaryElemDebugModeToDisk();
                 }
+
 
                 //update the offset of the final posting list files
                 current_dict_elem.setOffset_docids(RandomAccessFile_map.get(SPIMI.block_number+1).get(1).getChannel().size());

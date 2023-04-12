@@ -1,5 +1,6 @@
 package it.unipi.dii.aide.mircv.common.data_structures;
 
+import it.unipi.dii.aide.mircv.cli.utils.UploadDataStructures;
 import it.unipi.dii.aide.mircv.common.compression.Unary;
 import it.unipi.dii.aide.mircv.common.compression.VariableByte;
 import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
@@ -147,7 +148,7 @@ public class PostingList {
     public void writePostingListDebugMode() throws IOException {
         boolean first_posting = true;
 
-        String pl_string = this.term + " ->";
+        String pl_string = this.getTerm().toString() + " ->";
 
 
         for (Posting p : this.pl) {
@@ -231,7 +232,8 @@ public class PostingList {
         RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
 
         // Ricerca nel dizionario delle informazioni relative al termine
-        DictionaryElem d = dictionaryBinarySearch(term);
+        //DictionaryElem d = dictionaryBinarySearch(term);
+        DictionaryElem d = UploadDataStructures.Dictionary.get(term);
         if (d == null)
         {
             System.out.println("Termine non presente");
