@@ -2,6 +2,7 @@ package it.unipi.dii.aide.mircv.query_processing;
 
 import it.unipi.dii.aide.mircv.common.data_structures.Flags;
 import it.unipi.dii.aide.mircv.common.data_structures.PostingList;
+import it.unipi.dii.aide.mircv.common.data_structures.Posting;
 import it.unipi.dii.aide.mircv.query_processing.Algorithms.DAAT;
 
 import javax.xml.crypto.Data;
@@ -19,6 +20,8 @@ public class QueryPreprocesser {
     public static ArrayList<PostingList> orderedPlQueryTerm = new ArrayList<>();
     public static HashMap<Integer, Double> hm_PosScore = new HashMap<>();
     public static ArrayList<Double> orderedMaxScore;
+    // variable for conjunctive query
+    public static HashMap<Integer, Integer> hm_PosLen = new HashMap<>();
 
     // ordinamento ascendente
     public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
@@ -42,10 +45,11 @@ public class QueryPreprocesser {
             pl.getPl().clear();
             pl.setTerm(t);
             pl.obtainPostingList(t, score);
-            if(!Flags.isMaxScore_flag())
-                plQueryTerm.add(pl);
-            else
+            plQueryTerm.add(pl);
+            if(Flags.isMaxScore_flag())
                 hm_PosScore.put(pos, score);
+
+            hm_PosLen.put(pos,pl.getPl().size());
 
             pos++;
         }
@@ -68,8 +72,65 @@ public class QueryPreprocesser {
             executeDAAT(10);
 
         plQueryTerm.clear();
-        //score_hm.clear();
+        orderedMaxScore.clear();
+        hm_PosScore.clear();
+        orderedMaxScore.clear();
+        hm_PosLen.clear();
     }
 
+/*
+    public static ArrayList<Long> executeConjunctiveQuery(){
+        // Order the posting list in increasing order of length
+        hm_PosLen = (HashMap<Integer, Integer>) sortByValue(hm_PosLen);
 
+        for (Map.Entry<Integer, Double> entry: hm_PosScore.entrySet()){
+            orderedPlQueryTerm.add(plQueryTerm.get(entry.getKey()));
+        }
+
+        // Array to maintain for each posting list the position of the docID to analyze
+        // At the beginning they are all zero because we start from the first position
+        //ArrayList<Integer> pos=new ArrayList<>(Collections.nCopies(QueryPreprocesser.orderedPlQueryTerm.size(), 0));
+        Long current;
+        int posFinal;
+        int currentPos;
+        ArrayList<Long> finalDocIdList = new ArrayList<>();
+        ArrayList<Long> temp = new ArrayList<>();
+
+        for (Posting p: orderedPlQueryTerm.get(0).getPl())
+            finalDocIdList.add(p.getDocID());
+
+        //binary merge boolean conjunctive algorithm
+        for(int i=1; i<orderedPlQueryTerm.size(); i++){
+            posFinal=0;
+            temp.clear();
+            current=finalDocIdList.get(posFinal);
+            while (true){
+                currentPos=orderedPlQueryTerm.get(i).next(current, 0);
+                if(currentPos>0){
+                    if(orderedPlQueryTerm.get(i).getPl().get(currentPos).getDocID()==current){
+                        // docid found
+                        temp.add(current);
+                    }
+                }
+
+                posFinal++;
+                if(posFinal==finalDocIdList.size() || currentPos<0)
+                    break;
+
+                current=finalDocIdList.get(posFinal);
+            }
+
+            finalDocIdList.clear();
+            finalDocIdList.addAll(temp);
+            if(finalDocIdList.size()==0){
+                // there aren't common docId
+                // the query doesn't produce results
+                return null;
+            }
+        }
+
+        return finalDocIdList;
+    }
+
+*/
 }

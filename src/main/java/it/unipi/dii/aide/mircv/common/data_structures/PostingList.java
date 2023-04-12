@@ -31,13 +31,14 @@ public class PostingList {
 
     public PostingList(String term, Posting p) {
         this.term = term;
-        pl = new ArrayList<>();
-        pl.add(p);
+        this.pl = new ArrayList<>();
+        this.pl.add(p);
     }
 
     public PostingList(String term, ArrayList<Posting> pl) {
         this.term = term;
-        this.pl = pl;
+        this.pl = new ArrayList<>();
+        this.pl.addAll(pl);
     }
 
     public void setTerm(String term) {
@@ -249,5 +250,14 @@ public class PostingList {
         else
             score = d.getMaxTFIDF();
 
+    }
+
+    public int next(long docid, int StartPos){
+        for(int i=StartPos; i<pl.size(); i++){
+            if(pl.get(i).getDocID()>=docid){
+                return i;
+            }
+        }
+        return -1;
     }
 }

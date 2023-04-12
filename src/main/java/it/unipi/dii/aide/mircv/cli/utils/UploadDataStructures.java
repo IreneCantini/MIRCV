@@ -34,9 +34,10 @@ public class UploadDataStructures {
         //retrieve file channel
         RandomAccessFile dic_raf = new RandomAccessFile(PATH_TO_VOCABULARY, "r");
 
-        DictionaryElem d_elem = new DictionaryElem();
+        DictionaryElem d_elem;
 
         for(int i = 0; i< dic_raf.getChannel().size()/92; i+=92){
+            d_elem = new DictionaryElem();
             d_elem.readDictionaryElemFromDisk(i, dic_raf.getChannel());
             Dictionary.put(d_elem.getTerm(), d_elem);
         }
@@ -64,5 +65,21 @@ public class UploadDataStructures {
         Flags.setMaxScore_flag(FlagsBuffer.getInt() == 1);
 
         Flags.setDebug_flag(FlagsBuffer.getInt() == 1);
+    }
+
+    public static void readCollectionInfoFromDisk() throws IOException {
+        CollectionInfo_raf = new RandomAccessFile(PATH_TO_COLLECTION_INFO_FILE, "r");
+
+        ByteBuffer docIndexBuffer = ByteBuffer.allocate(16);
+
+        CollectionInfo_raf.getChannel().position(0);
+
+        while (docIndexBuffer.hasRemaining()){
+            CollectionInfo_raf.getChannel().read(docIndexBuffer);
+        }
+
+        docIndexBuffer.rewind();
+        CollectionInfo.setDocid_counter(docIndexBuffer.getLong());
+        CollectionInfo.setTotal_doc_len(docIndexBuffer.getLong());
     }
 }
