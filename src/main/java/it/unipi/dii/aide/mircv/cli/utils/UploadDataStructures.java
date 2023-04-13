@@ -66,4 +66,20 @@ public class UploadDataStructures {
 
         Flags.setDebug_flag(FlagsBuffer.getInt() == 1);
     }
+
+    public static void readCollectionInfoFromDisk() throws IOException {
+        CollectionInfo_raf = new RandomAccessFile(PATH_TO_COLLECTION_INFO_FILE, "r");
+
+        ByteBuffer docIndexBuffer = ByteBuffer.allocate(16);
+
+        CollectionInfo_raf.getChannel().position(0);
+
+        while (docIndexBuffer.hasRemaining()){
+            CollectionInfo_raf.getChannel().read(docIndexBuffer);
+        }
+
+        docIndexBuffer.rewind();
+        CollectionInfo.setDocid_counter(docIndexBuffer.getLong());
+        CollectionInfo.setTotal_doc_len(docIndexBuffer.getLong());
+    }
 }
