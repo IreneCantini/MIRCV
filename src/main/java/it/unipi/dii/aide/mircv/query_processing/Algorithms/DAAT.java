@@ -52,6 +52,8 @@ public class DAAT {
 
 
             for (int i = 0; i < plQueryTerm.size(); i++) {
+                if (current_pos_pl.get(i) == plQueryTerm.get(i).getPl().size())
+                    continue;
                 if (plQueryTerm.get(i).getPl().get(current_pos_pl.get(i)).getDocID() == current_docid) {
 
                     if(Flags.isScoreMode())
@@ -61,7 +63,7 @@ public class DAAT {
                     current_pos_pl.set(i, current_pos_pl.get(i) + 1);
                 }
                 // Se ho finito i posting all'interno della posting list devo proseguire senza scorrere
-                if (plQueryTerm.get(i).getPl().size() - 1 < current_pos_pl.get(i))
+                if (current_pos_pl.get(i) == plQueryTerm.get(i).getPl().size())
                     continue;
 
                 // Altrimenti scorro e lo confronto con il valore di next

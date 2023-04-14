@@ -3,7 +3,6 @@ package it.unipi.dii.aide.mircv.common.data_structures;
 import it.unipi.dii.aide.mircv.cli.utils.UploadDataStructures;
 import it.unipi.dii.aide.mircv.common.compression.Unary;
 import it.unipi.dii.aide.mircv.common.compression.VariableByte;
-import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
-import static it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils.dictionaryBinarySearch;
 
 public class PostingList {
     private String term;
@@ -383,7 +381,7 @@ public class PostingList {
 
     }
 
-    public Posting nextPosting() throws IOException {
+    public void nextPosting() throws IOException {
 
         RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
         RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
@@ -393,7 +391,7 @@ public class PostingList {
             // Se ho finito anche i blocchi non devo fare altro
             if (!skippingElemIterator.hasNext()) {
                 actualPosting = null;
-                return null;
+                return;
             }
 
             // Leggo un nuovo blocco e aggiorno l'iteratore della posting list con quella nuova
@@ -413,21 +411,20 @@ public class PostingList {
 
         actualPosting = postingIterator.next();
 
-        return actualPosting;
     }
 
-    public Posting nextGEQ(long docID) throws IOException {
+    public void nextGEQ(long docID) throws IOException {
 
         boolean newBlock = false;
 
         // Per prima cosa devo vedere se il massimo docId del blocco corrente è minore del docId a cui sto cercando di
-        // saltare.
+        // saltare perchè se è minore passo ad analizzare quello dopo.
         while (actualSkippingBlock.getDocID() < docID) {
             // Allora devo cambiare blocco
             if (!skippingElemIterator.hasNext()) {
-                // Ho finito tutti i blocchi, non posso ritornare nessun posting
+                // Ho finito tutti i blocchi
                 actualPosting = null;
-                return null;
+                return;
             }
 
             // Aggiorno il blocco corrente con il prossimo blocco
@@ -456,20 +453,7 @@ public class PostingList {
         while (postingIterator.hasNext() && actualPosting.getDocID() < docID)
             actualPosting = postingIterator.next();
 
-        return actualPosting;
     }
-
-    /*
-    public int next(long docid, int StartPos){
-        for(int i=StartPos; i<pl.size(); i++){
-            if(pl.get(i).getDocID()>=docid){
-                return i;
-            }
-        }
-        return -1;
-    }
-
-     */
 
     public Posting getActualPosting() { return actualPosting; }
 
