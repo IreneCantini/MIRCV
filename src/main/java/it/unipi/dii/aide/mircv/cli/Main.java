@@ -16,7 +16,7 @@ public class Main {
 
 
         //retrieve Collection info
-        CollectionInfo.readCollectionInfoToDisk();
+        UploadDataStructures.readCollectionInfoFromDisk();
 
         //retrieve data structures from disk
         UploadDataStructures.readFlagsFromDisk();

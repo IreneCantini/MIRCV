@@ -55,7 +55,6 @@ public class CollectionInfo {
         disk_writer.close();
     }
 
-
 /*
     public static void printCollectionInfo() throws IOException {
         UploadDataStructures.readCollectionInfoToDisk();
