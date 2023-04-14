@@ -22,9 +22,10 @@ public class UploadDataStructures {
         //retrieve file channel
         doc_raf = new RandomAccessFile(PATH_TO_DOCUMENT_INDEX, "r");
 
-        DocumentIndexElem d_elem = new DocumentIndexElem();
+        DocumentIndexElem d_elem;
 
         for(int i = 0; i< CollectionInfo.getDocid_counter(); i+=36){
+            d_elem = new DocumentIndexElem();
             d_elem.readDocumentIndexElemFromDisk(i, doc_raf.getChannel());
             Document_Index.put(d_elem.getDocId(), d_elem);
         }
@@ -34,7 +35,7 @@ public class UploadDataStructures {
         //retrieve file channel
         RandomAccessFile dic_raf = new RandomAccessFile(PATH_TO_VOCABULARY, "r");
 
-        DictionaryElem d_elem = new DictionaryElem();
+        DictionaryElem d_elem;
 
         for(int i = 0; i < dic_raf.getChannel().size(); i+=92){
             d_elem = new DictionaryElem();

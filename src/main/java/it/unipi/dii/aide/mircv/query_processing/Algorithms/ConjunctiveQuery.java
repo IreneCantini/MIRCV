@@ -14,6 +14,7 @@ import static it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser.ordered
 import static it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser.plQueryTerm;
 
 public class ConjunctiveQuery {
+    /*
     public static PriorityQueue<DocumentScore> executeConjunctiveQuery(int k) throws IOException {
 
         // Priority queue maintaining docid and score
@@ -78,4 +79,6 @@ public class ConjunctiveQuery {
         }
         return true;
     }
+
+     */
 }

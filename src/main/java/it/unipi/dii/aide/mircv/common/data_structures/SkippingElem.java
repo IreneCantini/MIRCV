@@ -99,7 +99,7 @@ public class SkippingElem{
         disk_writer.close();
     }
 
-    public void readSkippingElemFromDisk(int start_position, FileChannel skipFileChannel) throws IOException {
+    public void readSkippingElemFromDisk(long start_position, FileChannel skipFileChannel) throws IOException {
         ByteBuffer skipInfoBuffer = ByteBuffer.allocate(32);
 
         skipFileChannel.position(start_position);

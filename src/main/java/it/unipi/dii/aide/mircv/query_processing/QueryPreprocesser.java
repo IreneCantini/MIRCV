@@ -4,6 +4,7 @@ import it.unipi.dii.aide.mircv.common.data_structures.Flags;
 import it.unipi.dii.aide.mircv.common.data_structures.PostingList;
 import it.unipi.dii.aide.mircv.common.data_structures.Posting;
 import it.unipi.dii.aide.mircv.query_processing.Algorithms.DAAT;
+import it.unipi.dii.aide.mircv.query_processing.document_score.DocumentScore;
 
 import javax.xml.crypto.Data;
 import java.io.IOException;
@@ -36,26 +37,43 @@ public class QueryPreprocesser {
         return result;
     }
 
+    /**
+     * Per provare il MaxScore mettere ! agli if segnati con TODO
+     * @param tokens
+     * @throws IOException
+     * @throws InterruptedException
+     */
+
     public static void executeQueryProcesser(ArrayList<String> tokens) throws IOException, InterruptedException {
 
         int pos=0;
-        double score=0;
         for(String t: tokens){
             PostingList pl=new PostingList();
             pl.getPl().clear();
             pl.setTerm(t);
-            pl.obtainPostingList(t, score);
-            plQueryTerm.add(pl);
-            if(Flags.isMaxScore_flag())
-                hm_PosScore.put(pos, score);
 
-            hm_PosLen.put(pos,pl.getPl().size());
+            // TODO: per provare il MaxScore aggiungere !
+            if(!Flags.isMaxScore_flag())
+                pl.obtainPostingListMaxScore(t);
+            else
+                pl.obtainPostingListDAAT(t);
+
+            plQueryTerm.add(pl);
+            // TODO: per provare il MaxScore aggiungere !
+            if(!Flags.isMaxScore_flag()) {
+                if (Flags.isScoreMode())
+                    hm_PosScore.put(pos, pl.getMaxBM25());
+                else
+                    hm_PosScore.put(pos, pl.getMaxTFIDF());
+            }
+
+            hm_PosLen.put(pos, pl.getPl().size());
 
             pos++;
         }
 
-        if(Flags.isMaxScore_flag())
-        {
+        // TODO: per provare il MaxScore aggiungere !
+        if(!Flags.isMaxScore_flag()) {
             // ordinamento posting list in base allo score
             hm_PosScore = (HashMap<Integer, Double>) sortByValue(hm_PosScore);
 
@@ -65,16 +83,21 @@ public class QueryPreprocesser {
 
             orderedMaxScore=new ArrayList<>(hm_PosScore.values());
 
-            executeMaxScore(10);
+            PriorityQueue<DocumentScore> pQueueResult = executeMaxScore(10);
+            DocumentScore d = pQueueResult.poll();
+            System.out.println("MaxScore: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
+
+        } else {
+            PriorityQueue<DocumentScore> pQueueResult = executeDAAT(10);
+            DocumentScore d = pQueueResult.poll();
+            System.out.println("DAAT: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
         }
 
-        else
-            executeDAAT(10);
-
         plQueryTerm.clear();
-        orderedMaxScore.clear();
+        if(Flags.isMaxScore_flag())
+            orderedMaxScore.clear();
         hm_PosScore.clear();
-        orderedMaxScore.clear();
+        //orderedMaxScore.clear();
         hm_PosLen.clear();
     }
 

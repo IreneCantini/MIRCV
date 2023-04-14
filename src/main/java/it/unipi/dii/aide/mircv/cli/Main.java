@@ -50,7 +50,5 @@ public class Main {
             long end = System.currentTimeMillis() - start;
             System.out.println("Query executed in: " + end + " ms");
         }
-
-
     }
 }

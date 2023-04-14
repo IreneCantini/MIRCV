@@ -5,13 +5,11 @@ import it.unipi.dii.aide.mircv.common.compression.Unary;
 import it.unipi.dii.aide.mircv.common.compression.VariableByte;
 import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.*;
 import static it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils.dictionaryBinarySearch;
@@ -20,9 +18,29 @@ public class PostingList {
     private String term;
     private ArrayList<Posting> pl;
 
+    //Term upper bound for tfidf
+    private double maxTFIDF;
+
+    private double maxBM25;
+
+    // Serve per passare al blocco successivo: anzichè tenere un indice mano a mano che scorro i blocchi, con l'iterator
+    // posso chiamare la next() e mi restituisce il (elemento) blocco successivo
+    public Iterator<SkippingElem> skippingElemIterator = null;
+
+    public Iterator<Posting> postingIterator = null;
+
+    private ArrayList<SkippingElem> blocks = null;
+
+    // Indica il posting a cui siamo avanzati finora usando la next e la nextGeq
+    private Posting actualPosting;
+
+    // Mi serve per tenere traccia del blocco corrente
+    private SkippingElem actualSkippingBlock;
+
     public PostingList() {
         this.term = " ";
         this.pl = new ArrayList<>();
+        this.actualPosting = null;
     }
 
     public PostingList(String term) {
@@ -226,7 +244,63 @@ public class PostingList {
         }
     }
 
-    public void obtainPostingList(String term, double score) throws IOException {
+    public void readPostingListFromDiskWithSkipping(SkippingElem skip, FileChannel docidsFchannel, FileChannel freqsFchannel) throws IOException {
+        ByteBuffer docsByteBuffer = ByteBuffer.allocate(skip.getBlock_docId_len());
+        ByteBuffer freqByteBuffer = ByteBuffer.allocate(skip.getBlock_freq_len());
+
+        docidsFchannel.position(skip.getOffset_docId());
+        freqsFchannel.position(skip.getOffset_freq());
+
+        while(docsByteBuffer.hasRemaining()) {
+            docidsFchannel.read(docsByteBuffer);
+        }
+        while(freqByteBuffer.hasRemaining()) {
+            freqsFchannel.read(freqByteBuffer);
+        }
+
+        docsByteBuffer.rewind();
+        freqByteBuffer.rewind();
+
+        for(int i = 0; i< skip.getBlock_docId_len()/8; i++){
+            this.pl.add(new Posting(docsByteBuffer.getLong(), freqByteBuffer.getInt()));
+        }
+    }
+
+    public void readCompressedPostingListFromDiskWithSkipping(SkippingElem skip, FileChannel docidsFchannel, FileChannel freqsFchannel) throws IOException {
+        ByteBuffer docsByteBuffer = ByteBuffer.allocate(skip.getBlock_docId_len());
+        ByteBuffer freqsByteBuffer = ByteBuffer.allocate(skip.getBlock_freq_len());
+
+        docidsFchannel.position(skip.getOffset_docId());
+        freqsFchannel.position(skip.getOffset_freq());
+
+        while(docsByteBuffer.hasRemaining()) {
+            docidsFchannel.read(docsByteBuffer);
+        }
+        while(freqsByteBuffer.hasRemaining()) {
+            freqsFchannel.read(freqsByteBuffer);
+        }
+
+        docsByteBuffer.rewind();
+        freqsByteBuffer.rewind();
+
+        ArrayList<Long> docids = VariableByte.fromVariableByteToLong(docsByteBuffer.array());
+        ArrayList<Integer> freqs = Unary.fromUnaryToInt(freqsByteBuffer.array());
+
+        Posting p;
+
+        for(int i=0; i<docids.size(); i++){
+            p = new Posting(docids.get(i),freqs.get(i));
+            this.pl.add(p);
+        }
+
+        // Setto l'iteratore
+        postingIterator = pl.iterator();
+
+        // Inizializzo il Posting corrente
+        actualPosting = postingIterator.next();
+    }
+
+    public void obtainPostingListMaxScore(String term) throws IOException {
         //RandomAccessFile to read postinglist
         RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
         RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
@@ -240,7 +314,62 @@ public class PostingList {
             return;
         }
 
-        // Prelevamento della posting list con docID e Freq
+        // Leggo le informazione dello skipping e leggo il primo blocco
+        RandomAccessFile skipping_raf = new RandomAccessFile(PATH_TO_SKIPPING_FILE, "r");
+
+        // Indirizzo inziale da dove leggo le informazioni dello skipping del termine presente nel dizionario d
+        long startSkipping = d.getOffset_skipInfo();
+
+        // Dimensione di un descrittore dello skippingElem
+        long stepSkipping = 32;
+
+        // Dimensione totale delle informazioni di skipping (in pratica il numero di blocchi)
+        long sizeSkipping = d.getSkipInfo_len() / stepSkipping;
+
+        blocks = new ArrayList<>();
+
+        for (long i = 0; i < sizeSkipping; i++) {
+            SkippingElem skipElem = new SkippingElem();
+            skipElem.readSkippingElemFromDisk(startSkipping+(i*stepSkipping), skipping_raf.getChannel());
+            blocks.add(skipElem);
+        }
+
+        // Inizializzo il blocco corrente
+        actualSkippingBlock = blocks.get(0);
+
+        // Inizializzo l'iteratore degli skippingElem
+        skippingElemIterator = blocks.iterator();
+
+        // Lettura del primo blocco e inizializzazione dell'iteratore per la posting list (in modo da usare le funzioni
+        // hasNext() e next() fornite dalla classe Iterator
+        if(Flags.isCompression_flag()){
+            readPostingListFromDiskWithSkipping(blocks.get(0), pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+        }else {
+            readCompressedPostingListFromDiskWithSkipping(blocks.get(0), pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+        }
+
+        if(Flags.isScoreMode())
+            this.maxBM25 = d.getMaxBM25();
+        else
+            this.maxTFIDF = d.getMaxTFIDF();
+    }
+
+    public void obtainPostingListDAAT(String term) throws IOException {
+
+        //RandomAccessFile to read postinglist
+        RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
+        RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
+
+        // Ricerca nel dizionario delle informazioni relative al termine
+        //DictionaryElem d = dictionaryBinarySearch(term);
+        DictionaryElem d = UploadDataStructures.Dictionary.get(term);
+        if (d == null)
+        {
+            System.out.println("Termine non presente");
+            return;
+        }
+
+        // Prelievo della posting list con docID e Freq
         if(Flags.isCompression_flag()){
             readPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
         }else {
@@ -248,12 +377,89 @@ public class PostingList {
         }
 
         if(Flags.isScoreMode())
-            score = d.getMaxBM25();
+            this.maxBM25 = d.getMaxBM25();
         else
-            score = d.getMaxTFIDF();
+            this.maxTFIDF = d.getMaxTFIDF();
 
     }
 
+    public Posting nextPosting() throws IOException {
+
+        RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
+        RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
+
+        // Sono arrivato in fondo alla posting list del blocco corrente
+        if (!postingIterator.hasNext()) {
+            // Se ho finito anche i blocchi non devo fare altro
+            if (!skippingElemIterator.hasNext()) {
+                actualPosting = null;
+                return null;
+            }
+
+            // Leggo un nuovo blocco e aggiorno l'iteratore della posting list con quella nuova
+            SkippingElem newBlock = skippingElemIterator.next();
+
+            // Svuoto l'array contenente la posting list precedente
+            pl.clear();
+
+            if (Flags.isCompression_flag()) {
+                readPostingListFromDiskWithSkipping(newBlock, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+            }else {
+                readCompressedPostingListFromDiskWithSkipping(newBlock, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+            }
+
+            postingIterator = pl.iterator();
+        }
+
+        actualPosting = postingIterator.next();
+
+        return actualPosting;
+    }
+
+    public Posting nextGEQ(long docID) throws IOException {
+
+        boolean newBlock = false;
+
+        // Per prima cosa devo vedere se il massimo docId del blocco corrente è minore del docId a cui sto cercando di
+        // saltare.
+        while (actualSkippingBlock.getDocID() < docID) {
+            // Allora devo cambiare blocco
+            if (!skippingElemIterator.hasNext()) {
+                // Ho finito tutti i blocchi, non posso ritornare nessun posting
+                actualPosting = null;
+                return null;
+            }
+
+            // Aggiorno il blocco corrente con il prossimo blocco
+            actualSkippingBlock = skippingElemIterator.next();
+            newBlock = true;
+        }
+
+        if (newBlock) {
+            // Allora devo aggiornare tutti gli iteratori
+            pl.clear();
+
+            RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
+            RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
+
+            if (Flags.isCompression_flag()) {
+                readPostingListFromDiskWithSkipping(actualSkippingBlock, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+            }else {
+                readCompressedPostingListFromDiskWithSkipping(actualSkippingBlock, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+            }
+
+            postingIterator = pl.iterator();
+
+            actualPosting = postingIterator.next();
+        }
+
+        while (postingIterator.hasNext() && actualPosting.getDocID() < docID)
+            actualPosting = postingIterator.next();
+
+        return actualPosting;
+    }
+
+    /*
     public int next(long docid, int StartPos){
         for(int i=StartPos; i<pl.size(); i++){
             if(pl.get(i).getDocID()>=docid){
@@ -261,5 +467,25 @@ public class PostingList {
             }
         }
         return -1;
+    }
+
+     */
+
+    public Posting getActualPosting() { return actualPosting; }
+
+    public double getMaxTFIDF() {
+        return maxTFIDF;
+    }
+
+    public void setMaxTFIDF(double maxTFIDF) {
+        this.maxTFIDF = maxTFIDF;
+    }
+
+    public double getMaxBM25() {
+        return maxBM25;
+    }
+
+    public void setMaxBM25(double maxBM25) {
+        this.maxBM25 = maxBM25;
     }
 }

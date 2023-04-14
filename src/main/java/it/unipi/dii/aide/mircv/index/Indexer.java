@@ -2,6 +2,7 @@ package it.unipi.dii.aide.mircv.index;
 
 import it.unipi.dii.aide.mircv.common.data_structures.*;
 import it.unipi.dii.aide.mircv.common.file_management.FileUtils;
+import it.unipi.dii.aide.mircv.index.SPIMI;
 import it.unipi.dii.aide.mircv.index.utils.IndexUtils;
 
 import java.io.IOException;

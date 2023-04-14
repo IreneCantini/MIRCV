@@ -24,4 +24,13 @@ public class DocumentScore {
     public void setScore(double score) {
         this.score = score;
     }
+
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof DocumentScore){
+            DocumentScore c = (DocumentScore) o;
+            return docid == c.getDocid();
+        }
+        return false;
+    }
 }

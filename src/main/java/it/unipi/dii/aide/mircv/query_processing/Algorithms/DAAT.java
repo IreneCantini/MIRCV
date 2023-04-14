@@ -3,8 +3,9 @@ package it.unipi.dii.aide.mircv.query_processing.Algorithms;
 import it.unipi.dii.aide.mircv.cli.utils.UploadDataStructures;
 import it.unipi.dii.aide.mircv.common.data_structures.DocumentIndexElem;
 import it.unipi.dii.aide.mircv.common.data_structures.Flags;
-import it.unipi.dii.aide.mircv.query_processing.document_score.ComparatorScore;
+import it.unipi.dii.aide.mircv.query_processing.document_score.DecComparatorScore;
 import it.unipi.dii.aide.mircv.query_processing.document_score.DocumentScore;
+import it.unipi.dii.aide.mircv.query_processing.document_score.IncComparatorScore;
 import it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils;
 import it.unipi.dii.aide.mircv.query_processing.utils.Score;
 
@@ -26,7 +27,7 @@ public class DAAT {
 
         // Priority queue contenente docId e score
         PriorityQueue<DocumentScore> pQueue
-                = new PriorityQueue<>(k, new ComparatorScore());
+                = new PriorityQueue<>(k, new DecComparatorScore());
 
         // Arraylist contenente la posizione a cui sono arrivata per ogni posting list
         ArrayList<Integer> current_pos_pl = new ArrayList<Integer>(Collections.nCopies(plQueryTerm.size(),0));
