@@ -24,7 +24,7 @@ public class UploadDataStructures {
 
         DocumentIndexElem d_elem;
 
-        for(int i = 0; i< CollectionInfo.getDocid_counter(); i+=36){
+        for(int i = 0; i< doc_raf.getChannel().size(); i+=36){
             d_elem = new DocumentIndexElem();
             d_elem.readDocumentIndexElemFromDisk(i, doc_raf.getChannel());
             Document_Index.put(d_elem.getDocId(), d_elem);
