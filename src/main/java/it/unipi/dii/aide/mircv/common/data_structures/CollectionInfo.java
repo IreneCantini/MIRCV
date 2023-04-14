@@ -1,5 +1,7 @@
 package it.unipi.dii.aide.mircv.common.data_structures;
 
+import it.unipi.dii.aide.mircv.cli.utils.UploadDataStructures;
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -53,26 +55,14 @@ public class CollectionInfo {
         disk_writer.close();
     }
 
-    public static void readCollectionInfoToDisk() throws IOException {
-        CollectionInfo_raf = new RandomAccessFile(PATH_TO_COLLECTION_INFO_FILE, "r");
 
-        ByteBuffer docIndexBuffer = ByteBuffer.allocate(16);
-
-        CollectionInfo_raf.getChannel().position(0);
-
-        while (docIndexBuffer.hasRemaining()){
-            CollectionInfo_raf.getChannel().read(docIndexBuffer);
-        }
-
-        docIndexBuffer.rewind();
-        docid_counter = docIndexBuffer.getLong();
-        total_doc_len = docIndexBuffer.getLong();
-    }
-
+/*
     public static void printCollectionInfo() throws IOException {
-        readCollectionInfoToDisk();
+        UploadDataStructures.readCollectionInfoToDisk();
 
         System.out.println("Numero totale di docid: " + docid_counter + ", Lunghezza Collection: " + total_doc_len);
 
     }
+
+ */
 }
