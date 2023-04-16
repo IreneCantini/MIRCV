@@ -29,8 +29,8 @@ public class SPIMI {
     //Posting list of a term in memory
     public static HashMap<String, PostingList> PostingLists_instance = new HashMap<>();
 
-    //All document information
-    public static HashMap<Long, Long> Document_index_map = new HashMap<>();
+    //document information
+    public static ArrayList<Integer> DocsLen = new ArrayList<>();
 
     //total document length
     public static double totdl=0;
@@ -48,6 +48,7 @@ public class SPIMI {
 
         FileUtils.createDocIndexFile();
 
+
         long MaxUsableMemory = Runtime.getRuntime().maxMemory() * 80 / 100;
 
         //open and read collection
@@ -62,7 +63,7 @@ public class SPIMI {
             tokens.remove(0);
 
             doc_elem = new DocumentIndexElem(docid, docNo, tokens.size());
-            Document_index_map.put(docid, (long)tokens.size());
+            DocsLen.add(tokens.size());
             totdl+=tokens.size();
             doc_elem.writeDocIndexElemToDisk(doc_raf.getChannel());
             if(Flags.isDebug_flag())
@@ -119,7 +120,9 @@ public class SPIMI {
 
                 System.gc();
 
+                // devo controllare se la memoria libera torna maggiore di quella utilizzabile
                 while (Runtime.getRuntime().totalMemory() > MaxUsableMemory) {
+                    System.out.println();
                     Thread.sleep(100);
                 }
 

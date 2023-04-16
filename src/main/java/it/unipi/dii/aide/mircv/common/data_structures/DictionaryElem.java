@@ -12,6 +12,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.collection_length;
+import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.doc_raf;
 
 // #BYTES = 92
 public class DictionaryElem {
@@ -237,11 +238,11 @@ public class DictionaryElem {
         this.maxTFIDF = (1+Math.log10(this.maxTf))*this.idf;
     }
 
-    public void computeMaxBM25(PostingList pl) {
+    public void computeMaxBM25(PostingList pl) throws IOException {
         double current_BM25;
         for (Posting p: pl.getPl())
         {
-            current_BM25 = (p.getTermFrequency() / ((1 - 0.75) + 0.75 * (SPIMI.Document_index_map.get(p.getDocID()) / SPIMI.avdl) + p.getTermFrequency()))*this.idf;
+            current_BM25 = (p.getTermFrequency() / ((1 - 0.75) + 0.75 * (SPIMI.DocsLen.get((int) (p.getDocID()-1)) / SPIMI.avdl) + p.getTermFrequency()))*this.idf;
             if(current_BM25>this.getMaxBM25()){
                 this.setMaxBM25(current_BM25);
             }
