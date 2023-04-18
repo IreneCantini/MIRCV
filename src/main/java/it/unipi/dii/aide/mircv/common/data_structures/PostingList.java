@@ -35,6 +35,10 @@ public class PostingList {
     // Mi serve per tenere traccia del blocco corrente
     private SkippingElem actualSkippingBlock;
 
+    private RandomAccessFile pl_docId_raf;
+
+    private RandomAccessFile pl_freq_raf;
+
     public PostingList() {
         this.term = " ";
         this.pl = new ArrayList<>();
@@ -290,18 +294,16 @@ public class PostingList {
             p = new Posting(docids.get(i),freqs.get(i));
             this.pl.add(p);
         }
-
-        // Setto l'iteratore
-        postingIterator = pl.iterator();
-
-        // Inizializzo il Posting corrente
-        actualPosting = postingIterator.next();
     }
 
     public void obtainPostingListMaxScore(String term) throws IOException {
         //RandomAccessFile to read postinglist
+        initRandomFileChannels();
+        /*
         RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
         RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
+
+         */
 
         // Ricerca nel dizionario delle informazioni relative al termine
         //DictionaryElem d = dictionaryBinarySearch(term);
@@ -315,36 +317,54 @@ public class PostingList {
         // Leggo le informazione dello skipping e leggo il primo blocco
         RandomAccessFile skipping_raf = new RandomAccessFile(PATH_TO_SKIPPING_FILE, "r");
 
-        // Indirizzo inziale da dove leggo le informazioni dello skipping del termine presente nel dizionario d
-        long startSkipping = d.getOffset_skipInfo();
+        // Il termine non contiene blocchi in quanto ha la posting list < 1024
+        if (d.getSkipInfo_len() == 0) {
 
-        // Dimensione di un descrittore dello skippingElem
-        long stepSkipping = 32;
+            if(Flags.isCompression_flag())
+                readPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+            else
+                readCompressedPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
 
-        // Dimensione totale delle informazioni di skipping (in pratica il numero di blocchi)
-        long sizeSkipping = d.getSkipInfo_len() / stepSkipping;
+        } else {
 
-        blocks = new ArrayList<>();
+            // Indirizzo inziale da dove leggo le informazioni dello skipping del termine presente nel dizionario d
+            long startSkipping = d.getOffset_skipInfo();
 
-        for (long i = 0; i < sizeSkipping; i++) {
-            SkippingElem skipElem = new SkippingElem();
-            skipElem.readSkippingElemFromDisk(startSkipping+(i*stepSkipping), skipping_raf.getChannel());
-            blocks.add(skipElem);
+            // Dimensione di un descrittore dello skippingElem
+            long stepSkipping = 32;
+
+            // Dimensione totale delle informazioni di skipping (in pratica il numero di blocchi)
+            long sizeSkipping = d.getSkipInfo_len() / stepSkipping;
+
+            blocks = new ArrayList<>();
+
+            for (long i = 0; i < sizeSkipping; i++) {
+                SkippingElem skipElem = new SkippingElem();
+                skipElem.readSkippingElemFromDisk(startSkipping + (i * stepSkipping), skipping_raf.getChannel());
+                blocks.add(skipElem);
+            }
+
+            // Inizializzo il blocco corrente
+            actualSkippingBlock = blocks.get(0);
+
+            // Inizializzo l'iteratore degli skippingElem
+            skippingElemIterator = blocks.iterator();
+            skippingElemIterator.next();
+
+            // Lettura del primo blocco e inizializzazione dell'iteratore per la posting list (in modo da usare le funzioni
+            // hasNext() e next() fornite dalla classe Iterator
+            if (Flags.isCompression_flag()) {
+                readPostingListFromDiskWithSkipping(blocks.get(0), pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+            }else {
+                readCompressedPostingListFromDiskWithSkipping(blocks.get(0), pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+            }
         }
 
-        // Inizializzo il blocco corrente
-        actualSkippingBlock = blocks.get(0);
+        // Setto l'iteratore
+        postingIterator = pl.iterator();
 
-        // Inizializzo l'iteratore degli skippingElem
-        skippingElemIterator = blocks.iterator();
-
-        // Lettura del primo blocco e inizializzazione dell'iteratore per la posting list (in modo da usare le funzioni
-        // hasNext() e next() fornite dalla classe Iterator
-        if(Flags.isCompression_flag()){
-            readPostingListFromDiskWithSkipping(blocks.get(0), pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
-        }else {
-            readCompressedPostingListFromDiskWithSkipping(blocks.get(0), pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
-        }
+        // Inizializzo il Posting corrente
+        actualPosting = postingIterator.next();
 
         if(Flags.isScoreMode())
             this.maxBM25 = d.getMaxBM25();
@@ -383,11 +403,16 @@ public class PostingList {
 
     public void nextPosting() throws IOException {
 
-        RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
-        RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
-
         // Sono arrivato in fondo alla posting list del blocco corrente
         if (!postingIterator.hasNext()) {
+
+            // Se sono nel caso in cui non ho nessun blocco, mi fermo (questo if si può mettere come condizione in OR
+            // nell'if sottostante. L'ho messo qui per chiarezza.
+            if (skippingElemIterator == null) {
+                actualPosting = null;
+                return;
+            }
+
             // Se ho finito anche i blocchi non devo fare altro
             if (!skippingElemIterator.hasNext()) {
                 actualPosting = null;
@@ -413,6 +438,11 @@ public class PostingList {
 
     }
 
+    private void initRandomFileChannels() throws FileNotFoundException {
+        pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
+        pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
+    }
+
     public void nextGEQ(long docID) throws IOException {
 
         boolean newBlock = false;
@@ -436,8 +466,11 @@ public class PostingList {
             // Allora devo aggiornare tutti gli iteratori
             pl.clear();
 
+            /*
             RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
             RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
+
+             */
 
             if (Flags.isCompression_flag()) {
                 readPostingListFromDiskWithSkipping(actualSkippingBlock, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());

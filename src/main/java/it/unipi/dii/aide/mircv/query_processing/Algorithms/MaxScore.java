@@ -63,12 +63,13 @@ public class MaxScore {
         long next;
 
         // While there is at least an essential list and there are documents to process
-        while (pivot<QueryPreprocesser.orderedPlQueryTerm.size() && current!=-1){
+        while (pivot < QueryPreprocesser.orderedPlQueryTerm.size() && current != -1){
             score=0;
             // next <- +infinite
             next = CollectionInfo.getDocid_counter()+1;
 
             // process the essential lists
+
             for(int i = pivot; i < QueryPreprocesser.orderedPlQueryTerm.size(); i++){
                 if (QueryPreprocesser.orderedPlQueryTerm.get(i).getActualPosting() == null)
                     continue;
@@ -80,7 +81,6 @@ public class MaxScore {
 
                     if (QueryPreprocesser.orderedPlQueryTerm.get(i).getActualPosting() == null)
                         continue;
-
                 }
 
                 if (QueryPreprocesser.orderedPlQueryTerm.get(i).getActualPosting().getDocID() < next){
@@ -102,22 +102,24 @@ public class MaxScore {
                 // return -1 if the posting list doesn't have a docid grater or equal 'current'.
                 QueryPreprocesser.orderedPlQueryTerm.get(i).nextGEQ(current);
 
+
                 if (QueryPreprocesser.orderedPlQueryTerm.get(i).getActualPosting() == null)
                     continue;
 
-                if(QueryPreprocesser.orderedPlQueryTerm.get(i).getActualPosting().getDocID() == current){
+
+                if (QueryPreprocesser.orderedPlQueryTerm.get(i).getActualPosting().getDocID() == current){
                     score = updateScore(score, i);
                 }
             }
 
             // List pivot update
             if(decPQueue.size()<k){
+
                 decPQueue.add(new DocumentScore(current, score));
                 incPQueue.add(new DocumentScore(current, score));
-            }
-            else
-            {
-                if(incPQueue.peek().getScore() < score){
+            } else {
+
+                if (incPQueue.peek().getScore() < score) {
                     decPQueue.add(new DocumentScore(current, score));
                     incPQueue.add(new DocumentScore(current, score));
                     //remove from decPQueue e incPQueue the element with the smallest score
@@ -127,16 +129,17 @@ public class MaxScore {
                 threshold = incPQueue.peek().getScore();
 
                 //update pivot
-                while (pivot < QueryPreprocesser.orderedPlQueryTerm.size() && ub.get(pivot)<=threshold){
+                while (pivot < QueryPreprocesser.orderedPlQueryTerm.size() && ub.get(pivot) <= threshold){
                     pivot++;
                 }
             }
 
             if (next == CollectionInfo.getDocid_counter()+1)
-                current = -1;
+                break;
             else
                 current = next;
         }
+
         return decPQueue;
     }
 
