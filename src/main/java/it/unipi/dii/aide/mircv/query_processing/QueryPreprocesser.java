@@ -94,10 +94,12 @@ public class QueryPreprocesser {
         }
 
         plQueryTerm.clear();
-        if(Flags.isMaxScore_flag())
+        if(!Flags.isMaxScore_flag())
+        {
             orderedMaxScore.clear();
+            orderedPlQueryTerm.clear();
+        }
         hm_PosScore.clear();
-        //orderedMaxScore.clear();
         hm_PosLen.clear();
     }
 

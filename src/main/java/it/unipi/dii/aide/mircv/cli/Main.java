@@ -16,21 +16,26 @@ public class Main {
 
 
         //retrieve Collection info
+        System.out.println("Uploading Collection information ... ");
         UploadDataStructures.readCollectionInfoFromDisk();
 
         //retrieve data structures from disk
+        System.out.println("Uploading Flag information ... ");
         UploadDataStructures.readFlagsFromDisk();
+        System.out.println("Uploading Document index ... ");
         UploadDataStructures.readDocumentIndexFromDisk();
+        System.out.println("Uploading Dictionary ... ");
         UploadDataStructures.readDictionaryFromDisk();
 
-        System.out.println("Last element: " + UploadDataStructures.Dictionary.get("project"));
+        //System.out.println("Last element: " + UploadDataStructures.Dictionary.get("project"));
 
-        System.out.println("Write Query or 'exit' command to terminate: ");
-        Scanner sc=new Scanner(System.in);
         String query;
         ArrayList<String> tokens;
+        String type;
         
         while(true) {
+            System.out.println("Write Query or 'exit' command to terminate: ");
+            Scanner sc=new Scanner(System.in);
             query = sc.nextLine();
 
             if(query==null || query.isEmpty()){
@@ -41,6 +46,14 @@ public class Main {
             if(query.equals("exit"))
                 break;
 
+            do{
+                System.out.println("Write: 1 -> to execute DAAT, 2 -> to execute MAxScore  ");
+                sc=new Scanner(System.in);
+                type = sc.nextLine();
+            }while (!type.equals("1") && !type.equals("2"));
+
+            Flags.setMaxScore_flag(type.equals("1"));
+
             //flag = true to execute stemming
             //flag = false to not execute stemming
             long start = System.currentTimeMillis();
@@ -49,6 +62,7 @@ public class Main {
             QueryPreprocesser.executeQueryProcesser(tokens);
             long end = System.currentTimeMillis() - start;
             System.out.println("Query executed in: " + end + " ms");
+            tokens.clear();
         }
     }
 }
