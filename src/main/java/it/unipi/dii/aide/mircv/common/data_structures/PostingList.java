@@ -399,6 +399,12 @@ public class PostingList {
         else
             this.maxTFIDF = d.getMaxTFIDF();
 
+        // Setto l'iteratore
+        postingIterator = pl.iterator();
+
+        // Inizializzo il Posting corrente
+        actualPosting = postingIterator.next();
+
     }
 
     public void nextPosting() throws IOException {
