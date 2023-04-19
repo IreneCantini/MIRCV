@@ -27,7 +27,7 @@ public class ConjunctiveQuery {
         // Order the posting list in increasing order of length
         QueryPreprocesser.hm_PosLen = (HashMap<Integer, Integer>) QueryPreprocesser.sortByValue(QueryPreprocesser.hm_PosLen);
 
-        for (Map.Entry<Integer, Double> entry: QueryPreprocesser.hm_PosScore.entrySet()){
+        for (Map.Entry<Integer, Integer> entry: QueryPreprocesser.hm_PosLen.entrySet()){
             QueryPreprocesser.orderedPlQueryTerm.add(plQueryTerm.get(entry.getKey()));
         }
 

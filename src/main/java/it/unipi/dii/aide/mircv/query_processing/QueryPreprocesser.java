@@ -71,7 +71,13 @@ public class QueryPreprocesser {
 
 
         if(Flags.isQueryMode()){
-            ConjunctiveQuery.executeConjunctiveQuery(10);
+            PriorityQueue<DocumentScore> pQueueResult = ConjunctiveQuery.executeConjunctiveQuery(10);
+            DocumentScore d = pQueueResult.poll();
+            if (d == null)
+                System.out.println("< Nessun documento :( >");
+            else
+                System.out.println("Conjunctive: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
+
         }else {
             if (Flags.isMaxScore_flag()) {
                 // ordinamento posting list in base allo score
