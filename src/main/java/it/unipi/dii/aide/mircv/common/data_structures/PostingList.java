@@ -296,14 +296,9 @@ public class PostingList {
         }
     }
 
-    public void obtainPostingListMaxScore(String term) throws IOException {
+    public void obtainPostingList(String term) throws IOException {
         //RandomAccessFile to read postinglist
         initRandomFileChannels();
-        /*
-        RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
-        RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
-
-         */
 
         // Ricerca nel dizionario delle informazioni relative al termine
         //DictionaryElem d = dictionaryBinarySearch(term);
@@ -370,41 +365,6 @@ public class PostingList {
             this.maxBM25 = d.getMaxBM25();
         else
             this.maxTFIDF = d.getMaxTFIDF();
-    }
-
-    public void obtainPostingListDAAT(String term) throws IOException {
-
-        //RandomAccessFile to read postinglist
-        RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
-        RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
-
-        // Ricerca nel dizionario delle informazioni relative al termine
-        //DictionaryElem d = dictionaryBinarySearch(term);
-        DictionaryElem d = UploadDataStructures.Dictionary.get(term);
-        if (d == null)
-        {
-            System.out.println("Termine non presente");
-            return;
-        }
-
-        // Prelievo della posting list con docID e Freq
-        if(Flags.isCompression_flag()){
-            readPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
-        }else {
-            readCompressedPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
-        }
-
-        if(Flags.isScoreMode())
-            this.maxBM25 = d.getMaxBM25();
-        else
-            this.maxTFIDF = d.getMaxTFIDF();
-
-        // Setto l'iteratore
-        postingIterator = pl.iterator();
-
-        // Inizializzo il Posting corrente
-        actualPosting = postingIterator.next();
-
     }
 
     public void nextPosting() throws IOException {

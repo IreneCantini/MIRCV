@@ -52,23 +52,29 @@ public class QueryPreprocesser {
             pl.getPl().clear();
             pl.setTerm(t);
 
-            if(Flags.isMaxScore_flag())
-                pl.obtainPostingListMaxScore(t);
-            else
-                pl.obtainPostingListDAAT(t);
-
-            plQueryTerm.add(pl);
-
-            if(Flags.isMaxScore_flag()) {
-                if (Flags.isScoreMode())
-                    hm_PosScore.put(pos, pl.getMaxBM25());
+            if(!Flags.isQueryMode()) {
+                /*if (Flags.isMaxScore_flag())
+                    pl.obtainPostingListMaxScore(t);
                 else
-                    hm_PosScore.put(pos, pl.getMaxTFIDF());
+                    pl.obtainPostingListDAAT(t); */
+
+                pl.obtainPostingList(t);
+
+                plQueryTerm.add(pl);
+
+                if (Flags.isMaxScore_flag()) {
+                    if (Flags.isScoreMode())
+                        hm_PosScore.put(pos, pl.getMaxBM25());
+                    else
+                        hm_PosScore.put(pos, pl.getMaxTFIDF());
+                }
+
+                hm_PosLen.put(pos, pl.getPl().size());
+
+                pos++;
+            }else{
+                break;
             }
-
-            hm_PosLen.put(pos, pl.getPl().size());
-
-            pos++;
         }
 
 
@@ -93,7 +99,7 @@ public class QueryPreprocesser {
         }
 
         plQueryTerm.clear();
-        if(!Flags.isMaxScore_flag())
+        if(Flags.isMaxScore_flag())
         {
             orderedMaxScore.clear();
             orderedPlQueryTerm.clear();

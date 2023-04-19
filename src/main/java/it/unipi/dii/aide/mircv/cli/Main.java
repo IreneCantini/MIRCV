@@ -14,17 +14,18 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
+        System.out.println("*** Welcome! ***");
 
         //retrieve Collection info
-        System.out.println("Uploading Collection information ... ");
+        System.out.println("\nLoading Collection information ... ");
         UploadDataStructures.readCollectionInfoFromDisk();
 
         //retrieve data structures from disk
-        System.out.println("Uploading Flag information ... ");
+        System.out.println("\nLoading Flag information... ");
         UploadDataStructures.readFlagsFromDisk();
-        System.out.println("Uploading Document index ... ");
+        System.out.println("\nLoading Document index... ");
         UploadDataStructures.readDocumentIndexFromDisk();
-        System.out.println("Uploading Dictionary ... ");
+        System.out.println("\nLoading Dictionary... ");
         UploadDataStructures.readDictionaryFromDisk();
 
         String query;
@@ -32,7 +33,7 @@ public class Main {
         String type;
         
         while(true) {
-            System.out.println("Write Query or 'exit' command to terminate: ");
+            System.out.println("\nWrite Query or 'exit' command to terminate: ");
             Scanner sc=new Scanner(System.in);
             query = sc.nextLine();
 

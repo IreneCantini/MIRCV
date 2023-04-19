@@ -72,7 +72,7 @@ public class Flags {
         return debug_flag;
     }
 
-    public static boolean isQueryMode() {return queryMode;    }
+    public static boolean isQueryMode() {return queryMode;}
 
     public static void writeFlagToDisk() throws IOException {
         ByteBuffer FlagsBuffer = ByteBuffer.allocate(16);
