@@ -3,6 +3,7 @@ package it.unipi.dii.aide.mircv.query_processing;
 import it.unipi.dii.aide.mircv.common.data_structures.Flags;
 import it.unipi.dii.aide.mircv.common.data_structures.PostingList;
 import it.unipi.dii.aide.mircv.common.data_structures.Posting;
+import it.unipi.dii.aide.mircv.query_processing.Algorithms.ConjunctiveQuery;
 import it.unipi.dii.aide.mircv.query_processing.Algorithms.DAAT;
 import it.unipi.dii.aide.mircv.query_processing.document_score.DocumentScore;
 
@@ -52,60 +53,54 @@ public class QueryPreprocesser {
             pl.getPl().clear();
             pl.setTerm(t);
 
-            if(!Flags.isQueryMode()) {
-                /*if (Flags.isMaxScore_flag())
-                    pl.obtainPostingListMaxScore(t);
+            pl.obtainPostingList(t);
+
+            plQueryTerm.add(pl);
+
+            if (Flags.isMaxScore_flag()) {
+                if (Flags.isScoreMode())
+                    hm_PosScore.put(pos, pl.getMaxBM25());
                 else
-                    pl.obtainPostingListDAAT(t); */
+                    hm_PosScore.put(pos, pl.getMaxTFIDF());
+            }
 
-                pl.obtainPostingList(t);
+            hm_PosLen.put(pos, pl.getPl().size());
 
-                plQueryTerm.add(pl);
+            pos++;
+        }
 
-                if (Flags.isMaxScore_flag()) {
-                    if (Flags.isScoreMode())
-                        hm_PosScore.put(pos, pl.getMaxBM25());
-                    else
-                        hm_PosScore.put(pos, pl.getMaxTFIDF());
+
+        if(Flags.isQueryMode()){
+            ConjunctiveQuery.executeConjunctiveQuery(10);
+        }else {
+            if (Flags.isMaxScore_flag()) {
+                // ordinamento posting list in base allo score
+                hm_PosScore = (HashMap<Integer, Double>) sortByValue(hm_PosScore);
+
+                for (Map.Entry<Integer, Double> entry : hm_PosScore.entrySet()) {
+                    orderedPlQueryTerm.add(plQueryTerm.get(entry.getKey()));
                 }
 
-                hm_PosLen.put(pos, pl.getPl().size());
+                orderedMaxScore = new ArrayList<>(hm_PosScore.values());
 
-                pos++;
-            }else{
-                break;
-            }
-        }
+                PriorityQueue<DocumentScore> pQueueResult = executeMaxScore(10);
+                DocumentScore d = pQueueResult.poll();
+                System.out.println("MaxScore: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
 
-
-        if(Flags.isMaxScore_flag()) {
-            // ordinamento posting list in base allo score
-            hm_PosScore = (HashMap<Integer, Double>) sortByValue(hm_PosScore);
-
-            for (Map.Entry<Integer, Double> entry: hm_PosScore.entrySet()){
-                orderedPlQueryTerm.add(plQueryTerm.get(entry.getKey()));
+            } else {
+                PriorityQueue<DocumentScore> pQueueResult = executeDAAT(10);
+                DocumentScore d = pQueueResult.poll();
+                System.out.println("DAAT: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
             }
 
-            orderedMaxScore=new ArrayList<>(hm_PosScore.values());
-
-            PriorityQueue<DocumentScore> pQueueResult = executeMaxScore(10);
-            DocumentScore d = pQueueResult.poll();
-            System.out.println("MaxScore: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
-
-        } else {
-            PriorityQueue<DocumentScore> pQueueResult = executeDAAT(10);
-            DocumentScore d = pQueueResult.poll();
-            System.out.println("DAAT: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
+            plQueryTerm.clear();
+            if (Flags.isMaxScore_flag()) {
+                orderedMaxScore.clear();
+                orderedPlQueryTerm.clear();
+            }
+            hm_PosScore.clear();
+            hm_PosLen.clear();
         }
-
-        plQueryTerm.clear();
-        if(Flags.isMaxScore_flag())
-        {
-            orderedMaxScore.clear();
-            orderedPlQueryTerm.clear();
-        }
-        hm_PosScore.clear();
-        hm_PosLen.clear();
     }
 
 /*
