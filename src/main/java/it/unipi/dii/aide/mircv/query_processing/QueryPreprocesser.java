@@ -55,6 +55,11 @@ public class QueryPreprocesser {
 
             pl.obtainPostingList(t);
 
+            if(pl.getPl() == null){
+                continue;
+            }
+
+
             plQueryTerm.add(pl);
 
             if (Flags.isMaxScore_flag()) {
@@ -99,14 +104,22 @@ public class QueryPreprocesser {
                 System.out.println("DAAT: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
             }
 
-            plQueryTerm.clear();
-            if (Flags.isMaxScore_flag()) {
-                orderedMaxScore.clear();
-                orderedPlQueryTerm.clear();
-            }
-            hm_PosScore.clear();
-            hm_PosLen.clear();
         }
+
+        if(orderedMaxScore!=null)
+            orderedMaxScore.clear();
+
+        if(orderedPlQueryTerm!=null)
+            orderedPlQueryTerm.clear();
+
+        if(plQueryTerm!=null)
+            plQueryTerm.clear();
+
+        if(hm_PosScore!=null)
+            hm_PosScore.clear();
+
+        if(hm_PosLen!=null)
+            hm_PosLen.clear();
     }
 
 /*
