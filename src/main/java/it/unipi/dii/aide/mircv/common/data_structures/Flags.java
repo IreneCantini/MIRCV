@@ -22,6 +22,7 @@ public class Flags {
     private static boolean filter_flag;
 
     //flag for checking if the max score algorithm is enabled
+    // true: execute maxScore
     private static boolean maxScore_flag;
 
     //flag for checking if the debug mode is enabled
@@ -29,6 +30,9 @@ public class Flags {
 
     // true: BM25, false: TFIDF
     private static boolean scoreMode= true;
+
+    // true: conjunctive query
+    private static boolean queryMode;
 
     public static void setCompression_flag(boolean compression_flag) {
         Flags.compression_flag = compression_flag;
@@ -48,6 +52,8 @@ public class Flags {
         Flags.debug_flag = debug_flag;
     }
 
+    public static void setQueryMode(boolean queryMode) {Flags.queryMode = queryMode;    }
+
     public static boolean isCompression_flag() {
         return !compression_flag;
     }
@@ -65,6 +71,8 @@ public class Flags {
     public static boolean isDebug_flag() {
         return debug_flag;
     }
+
+    public static boolean isQueryMode() {return queryMode;    }
 
     public static void writeFlagToDisk() throws IOException {
         ByteBuffer FlagsBuffer = ByteBuffer.allocate(16);

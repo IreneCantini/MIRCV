@@ -52,15 +52,14 @@ public class QueryPreprocesser {
             pl.getPl().clear();
             pl.setTerm(t);
 
-            // TODO: per provare il MaxScore aggiungere !
-            if(!Flags.isMaxScore_flag())
+            if(Flags.isMaxScore_flag())
                 pl.obtainPostingListMaxScore(t);
             else
                 pl.obtainPostingListDAAT(t);
 
             plQueryTerm.add(pl);
-            // TODO: per provare il MaxScore aggiungere !
-            if(!Flags.isMaxScore_flag()) {
+
+            if(Flags.isMaxScore_flag()) {
                 if (Flags.isScoreMode())
                     hm_PosScore.put(pos, pl.getMaxBM25());
                 else
@@ -72,8 +71,8 @@ public class QueryPreprocesser {
             pos++;
         }
 
-        // TODO: per provare il MaxScore aggiungere !
-        if(!Flags.isMaxScore_flag()) {
+
+        if(Flags.isMaxScore_flag()) {
             // ordinamento posting list in base allo score
             hm_PosScore = (HashMap<Integer, Double>) sortByValue(hm_PosScore);
 

@@ -27,8 +27,6 @@ public class Main {
         System.out.println("Uploading Dictionary ... ");
         UploadDataStructures.readDictionaryFromDisk();
 
-        //System.out.println("Last element: " + UploadDataStructures.Dictionary.get("project"));
-
         String query;
         ArrayList<String> tokens;
         String type;
@@ -47,12 +45,22 @@ public class Main {
                 break;
 
             do{
-                System.out.println("Write: 1 -> to execute DAAT, 2 -> to execute MAxScore  ");
+                System.out.println("Write: 1 -> to execute conjunctive query , 2 -> to execute disjunctive query");
                 sc=new Scanner(System.in);
                 type = sc.nextLine();
             }while (!type.equals("1") && !type.equals("2"));
 
-            Flags.setMaxScore_flag(type.equals("1"));
+            if(type.equals("1"))
+                Flags.setQueryMode(true);
+            else {
+                do{
+                    System.out.println("Write: 1 -> to execute DAAT, 2 -> to execute MAxScore  ");
+                    sc=new Scanner(System.in);
+                    type = sc.nextLine();
+                }while (!type.equals("1") && !type.equals("2"));
+            }
+
+            Flags.setMaxScore_flag(type.equals("2"));
 
             //flag = true to execute stemming
             //flag = false to not execute stemming
