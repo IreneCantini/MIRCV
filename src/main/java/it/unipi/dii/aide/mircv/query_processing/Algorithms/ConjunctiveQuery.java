@@ -27,7 +27,7 @@ public class ConjunctiveQuery {
         // Order the posting list in increasing order of length
         QueryPreprocesser.hm_PosLen = (HashMap<Integer, Integer>) QueryPreprocesser.sortByValue(QueryPreprocesser.hm_PosLen);
 
-        for (Map.Entry<Integer, Double> entry: QueryPreprocesser.hm_PosScore.entrySet()){
+        for (Map.Entry<Integer, Integer> entry: QueryPreprocesser.hm_PosLen.entrySet()){
             QueryPreprocesser.orderedPlQueryTerm.add(plQueryTerm.get(entry.getKey()));
         }
 
@@ -43,15 +43,13 @@ public class ConjunctiveQuery {
             // fetch the first docid to analyze
             // it is the shortest one presents in all the posting list
             do{
-                if(orderedPlQueryTerm.get(0).getActualPosting()==null)
-                    return pQueue; // there isn't any other docid in the shortest posting list
-
                 // Keep the candidate docid from the shortest posting list
                 current_docid = orderedPlQueryTerm.get(0).getActualPosting().getDocID();
-                orderedPlQueryTerm.get(0).nextPosting();
 
-                if(orderedPlQueryTerm.get(0).getActualPosting()==null)
-                    return pQueue; // there isn't any other docid in the shortest posting list
+                if(!orderedPlQueryTerm.get(0).postingIterator.hasNext())
+                   break; // there isn't any other docid in the shortest posting list
+
+                orderedPlQueryTerm.get(0).nextPosting();
 
             }while (!checkAllPostingList(current_docid));
 
@@ -67,6 +65,10 @@ public class ConjunctiveQuery {
 
             ds = new DocumentScore(current_docid, score);
             pQueue.add(ds);
+
+            // there isn't any other docid in the shortest posting list
+            if(!orderedPlQueryTerm.get(0).postingIterator.hasNext())
+                return pQueue;
         }
     }
 

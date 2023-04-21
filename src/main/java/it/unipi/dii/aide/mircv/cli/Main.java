@@ -101,6 +101,12 @@ public class Main {
             long start = System.currentTimeMillis();
             tokens = TextPreprocesser.executeTextPreprocessing(query);
 
+            if (tokens.size() == 0) {
+                System.out.println("Query not valid!");
+                continue;
+            }
+
+
             QueryPreprocesser.executeQueryProcesser(tokens);
             long end = System.currentTimeMillis() - start;
             System.out.println("Query executed in: " + end + " ms");
