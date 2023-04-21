@@ -67,7 +67,7 @@ public class Main {
             Flags.setMaxScore_flag(type.equals("2"));
 
             do{
-                System.out.println("Write the number of document you want to retrive: ");
+                System.out.println("Write the number of document you want to retrieve: ");
                 sc=new Scanner(System.in);
                 type = sc.nextLine();
                 try{
@@ -81,7 +81,7 @@ public class Main {
 
             //flag = true to execute stemming
             //flag = false to not execute stemming
-            long start = System.currentTimeMillis();
+
             tokens = TextPreprocesser.executeTextPreprocessing(query);
 
             if (tokens.size() == 0) {
@@ -89,6 +89,7 @@ public class Main {
                 continue;
             }
 
+            long start = System.currentTimeMillis();
             QueryPreprocesser.executeQueryProcesser(tokens, k);
             long end = System.currentTimeMillis() - start;
             System.out.println("Query executed in: " + end + " ms");

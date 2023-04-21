@@ -15,8 +15,8 @@ public class Indexer {
     public static void main(String[] args) throws IOException, InterruptedException {
 
         long start = System.currentTimeMillis();
-        Flags.setCompression_flag(true);
-        Flags.setFilter_flag(true);
+        Flags.setCompression_flag(false);
+        Flags.setFilter_flag(false);
         Flags.setMaxScore_flag(false);
         Flags.setDebug_flag(false);
         SPIMI.executeSPIMI("src/main/resources/collection.tsv"); //false: unfiltered, true: filtered
@@ -24,9 +24,6 @@ public class Indexer {
         long end = System.currentTimeMillis() - start;
         long time = (end/1000)/60;
         System.out.println("Inverted Index built in: " + time + " minutes");
-
-
-
 
         //Flags.printFlag();
 

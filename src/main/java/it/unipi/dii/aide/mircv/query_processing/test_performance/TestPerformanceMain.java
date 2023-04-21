@@ -80,7 +80,7 @@ public class TestPerformanceMain {
             long start = System.currentTimeMillis();
             tokens = TextPreprocesser.executeTextPreprocessing(queryWithoutDocID);
 
-            QueryPreprocesser.executeQueryProcesser(tokens);
+            QueryPreprocesser.executeQueryProcesser(tokens, 10);
             long end = System.currentTimeMillis() - start;
             System.out.println("Query executed in: " + end + " ms");
 
