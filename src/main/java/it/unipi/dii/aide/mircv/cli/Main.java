@@ -5,6 +5,7 @@ import it.unipi.dii.aide.mircv.common.data_structures.CollectionInfo;
 import it.unipi.dii.aide.mircv.common.data_structures.Flags;
 import it.unipi.dii.aide.mircv.common.text_preprocessing.TextPreprocesser;
 import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
+import org.apache.lucene.analysis.util.FilesystemResourceLoader;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -35,37 +36,8 @@ public class Main {
         String query;
         ArrayList<String> tokens;
         String type;
-        Scanner sc;
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("src/main/resources/query_test.tsv"), StandardCharsets.UTF_8));
-        query = reader.readLine();
-
-        do{
-            System.out.println("Write: 1 -> to execute conjunctive query , 2 -> to execute disjunctive query");
-            sc=new Scanner(System.in);
-            type = sc.nextLine();
-        }while (!type.equals("1") && !type.equals("2"));
-
-        do{
-            System.out.println("Write: 1 -> to execute DAAT, 2 -> to execute MAxScore  ");
-            sc=new Scanner(System.in);
-            type = sc.nextLine();
-        }while (!type.equals("1") && !type.equals("2"));
-
-        Flags.setMaxScore_flag(type.equals("2"));
-
-        while (query != null) {
-            long start = System.currentTimeMillis();
-            tokens = TextPreprocesser.executeTextPreprocessing(query);
-
-            QueryPreprocesser.executeQueryProcesser(tokens);
-            long end = System.currentTimeMillis() - start;
-            System.out.println("Query executed in: " + end + " ms");
-            query = reader.readLine();
-            tokens.clear();
-        }
-        
-       /* while(true) {
+        while(true) {
             System.out.println("\nWrite Query or 'exit' command to terminate: ");
             Scanner sc=new Scanner(System.in);
             query = sc.nextLine();
@@ -96,8 +68,6 @@ public class Main {
 
             Flags.setMaxScore_flag(type.equals("2"));
 
-            //flag = true to execute stemming
-            //flag = false to not execute stemming
             long start = System.currentTimeMillis();
             tokens = TextPreprocesser.executeTextPreprocessing(query);
 
@@ -111,6 +81,6 @@ public class Main {
             long end = System.currentTimeMillis() - start;
             System.out.println("Query executed in: " + end + " ms");
             tokens.clear();
-        } */
+        }
     }
 }

@@ -39,7 +39,7 @@ public class QueryPreprocesser {
     }
 
     /**
-     * Per provare il MaxScore mettere ! agli if segnati con TODO
+     *
      * @param tokens
      * @throws IOException
      * @throws InterruptedException
@@ -53,9 +53,9 @@ public class QueryPreprocesser {
             pl.getPl().clear();
             pl.setTerm(t);
 
-            pl.obtainPostingList(t);
+            boolean founded = pl.obtainPostingList(t);
 
-            if(pl.getPl() == null){
+            if (!founded) {
                 continue;
             }
 
@@ -75,13 +75,17 @@ public class QueryPreprocesser {
         }
 
 
+
         if(Flags.isQueryMode()){
             PriorityQueue<DocumentScore> pQueueResult = ConjunctiveQuery.executeConjunctiveQuery(10);
-            DocumentScore d = pQueueResult.poll();
-            if (d == null)
+            if (pQueueResult.isEmpty())
                 System.out.println("< Nessun documento :( >");
-            else
-                System.out.println("Conjunctive: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
+            else {
+                while(!pQueueResult.isEmpty()) {
+                    DocumentScore d = pQueueResult.poll();
+                    System.out.println("Conjunctive:  <" + d.getDocid() + ", " + d.getScore() + ">");
+                }
+            }
 
         }else {
             if (Flags.isMaxScore_flag()) {
@@ -95,13 +99,18 @@ public class QueryPreprocesser {
                 orderedMaxScore = new ArrayList<>(hm_PosScore.values());
 
                 PriorityQueue<DocumentScore> pQueueResult = executeMaxScore(10);
-                DocumentScore d = pQueueResult.poll();
-                System.out.println("MaxScore: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
+
+                while(!pQueueResult.isEmpty()) {
+                    DocumentScore d = pQueueResult.poll();
+                    System.out.println("MaxScore:  <" + d.getDocid() + ", " + d.getScore() + ">");
+                }
 
             } else {
                 PriorityQueue<DocumentScore> pQueueResult = executeDAAT(10);
-                DocumentScore d = pQueueResult.poll();
-                System.out.println("DAAT: 1st Document Score is: <" + d.getDocid() + ", " + d.getScore() + ">");
+                while(!pQueueResult.isEmpty()) {
+                    DocumentScore d = pQueueResult.poll();
+                    System.out.println("DAAT:  <" + d.getDocid() + ", " + d.getScore() + ">");
+                }
             }
 
         }
