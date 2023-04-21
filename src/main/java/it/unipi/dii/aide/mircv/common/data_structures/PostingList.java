@@ -305,7 +305,7 @@ public class PostingList {
         DictionaryElem d = UploadDataStructures.Dictionary.get(term);
         if (d == null)
         {
-            System.out.println("Termine non presente");
+            System.out.println("'" + term + "' : not present");
             return;
         }
 
@@ -315,10 +315,22 @@ public class PostingList {
         // Il termine non contiene blocchi in quanto ha la posting list < 1024
         if (d.getSkipInfo_len() == 0) {
 
-            if(Flags.isCompression_flag())
-                readPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
-            else
-                readCompressedPostingListFromDisk(d, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+            blocks = new ArrayList<>();
+
+            // creo comunque le informazioni relativo al primo blocco che conterrà l'intera posting list
+            actualSkippingBlock= new SkippingElem(0, d.getOffset_docids(), d.getDocids_len(), d.getOffset_tf(), d.getTf_len());
+            blocks.add(actualSkippingBlock);
+
+            skippingElemIterator = blocks.iterator();
+            skippingElemIterator.next();
+
+            if (Flags.isCompression_flag()) {
+                readPostingListFromDiskWithSkipping(blocks.get(0), pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+            }else {
+                readCompressedPostingListFromDiskWithSkipping(blocks.get(0), pl_docId_raf.getChannel(), pl_freq_raf.getChannel());
+            }
+
+            actualSkippingBlock.setDocID(this.getPl().get(this.getPl().size()-1).getDocID());
 
         } else {
 
@@ -431,12 +443,6 @@ public class PostingList {
         if (newBlock) {
             // Allora devo aggiornare tutti gli iteratori
             pl.clear();
-
-            /*
-            RandomAccessFile pl_docId_raf = new RandomAccessFile(PATH_TO_DOCIDS_POSTINGLIST, "r");
-            RandomAccessFile pl_freq_raf = new RandomAccessFile(PATH_TO_FREQ_POSTINGLIST, "r");
-
-             */
 
             if (Flags.isCompression_flag()) {
                 readPostingListFromDiskWithSkipping(actualSkippingBlock, pl_docId_raf.getChannel(), pl_freq_raf.getChannel());

@@ -5,6 +5,7 @@ import it.unipi.dii.aide.mircv.common.data_structures.PostingList;
 import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
 import it.unipi.dii.aide.mircv.query_processing.document_score.DecComparatorScore;
 import it.unipi.dii.aide.mircv.query_processing.document_score.DocumentScore;
+import it.unipi.dii.aide.mircv.query_processing.document_score.IncComparatorScore;
 import it.unipi.dii.aide.mircv.query_processing.utils.Score;
 
 import java.io.IOException;
@@ -17,12 +18,14 @@ public class ConjunctiveQuery {
 
     public static PriorityQueue<DocumentScore> executeConjunctiveQuery(int k) throws IOException {
 
-        // Priority queue maintaining docid and score
-        PriorityQueue<DocumentScore> pQueue
+        // Priority queue to maintain the docIds with the highest score in decreasing order
+        PriorityQueue<DocumentScore> decPQueue
                 = new PriorityQueue<>(k, new DecComparatorScore());
 
-        // Arraylist maintaining, for each posting list, the position at which read the next docid
-        //ArrayList<Integer> current_pos_pl = new ArrayList<>(Collections.nCopies(plQueryTerm.size(),0));
+        // Priority queue to maintain the docIds with the highest score in increasing order
+        // it is used to maintain the smallest score
+        PriorityQueue<DocumentScore> incPQueue
+                = new PriorityQueue<>(k, new IncComparatorScore());
 
         // Order the posting list in increasing order of length
         QueryPreprocesser.hm_PosLen = (HashMap<Integer, Integer>) QueryPreprocesser.sortByValue(QueryPreprocesser.hm_PosLen);
@@ -36,6 +39,7 @@ public class ConjunctiveQuery {
         // temporary variable
         DocumentScore ds;
         long current_docid = 0;
+        boolean firstTime=true;
 
         //Loop until all the docId of the first postinglist have been processed
         while(true) {
@@ -43,13 +47,14 @@ public class ConjunctiveQuery {
             // fetch the first docid to analyze
             // it is the shortest one presents in all the posting list
             do{
+                if(!firstTime)
+                    orderedPlQueryTerm.get(0).nextPosting();
+
+                firstTime=false;
+                if(orderedPlQueryTerm.get(0).getActualPosting()==null)
+                    return decPQueue;
                 // Keep the candidate docid from the shortest posting list
                 current_docid = orderedPlQueryTerm.get(0).getActualPosting().getDocID();
-
-                if(!orderedPlQueryTerm.get(0).postingIterator.hasNext())
-                   break; // there isn't any other docid in the shortest posting list
-
-                orderedPlQueryTerm.get(0).nextPosting();
 
             }while (!checkAllPostingList(current_docid));
 
@@ -63,12 +68,23 @@ public class ConjunctiveQuery {
                     score += Score.TFIDF(postingList.getTerm(), postingList.getActualPosting());
             }
 
-            ds = new DocumentScore(current_docid, score);
-            pQueue.add(ds);
+            if(decPQueue.size()<k){
+
+                decPQueue.add(new DocumentScore(current_docid, score));
+                incPQueue.add(new DocumentScore(current_docid, score));
+            } else {
+
+                if (incPQueue.peek().getScore() < score) {
+                    decPQueue.add(new DocumentScore(current_docid, score));
+                    incPQueue.add(new DocumentScore(current_docid, score));
+                    //remove from decPQueue e incPQueue the element with the smallest score
+                    decPQueue.remove(incPQueue.poll());
+                }
+            }
 
             // there isn't any other docid in the shortest posting list
             if(!orderedPlQueryTerm.get(0).postingIterator.hasNext())
-                return pQueue;
+                return decPQueue;
         }
     }
 

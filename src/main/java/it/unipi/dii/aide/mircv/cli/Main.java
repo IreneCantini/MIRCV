@@ -5,13 +5,8 @@ import it.unipi.dii.aide.mircv.common.data_structures.CollectionInfo;
 import it.unipi.dii.aide.mircv.common.data_structures.Flags;
 import it.unipi.dii.aide.mircv.common.text_preprocessing.TextPreprocesser;
 import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
-import org.apache.lucene.analysis.util.FilesystemResourceLoader;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +31,9 @@ public class Main {
         String query;
         ArrayList<String> tokens;
         String type;
-
+        int k=-1;
+        boolean goon=false;
+        
         while(true) {
             System.out.println("\nWrite Query or 'exit' command to terminate: ");
             Scanner sc=new Scanner(System.in);
@@ -59,8 +56,9 @@ public class Main {
             if(type.equals("1"))
                 Flags.setQueryMode(true);
             else {
+                Flags.setQueryMode(false);
                 do{
-                    System.out.println("Write: 1 -> to execute DAAT, 2 -> to execute MAxScore  ");
+                    System.out.println("Write: 1 -> to execute DAAT, 2 -> to execute MaxScore  ");
                     sc=new Scanner(System.in);
                     type = sc.nextLine();
                 }while (!type.equals("1") && !type.equals("2"));
@@ -68,6 +66,21 @@ public class Main {
 
             Flags.setMaxScore_flag(type.equals("2"));
 
+            do{
+                System.out.println("Write the number of document you want to retrive: ");
+                sc=new Scanner(System.in);
+                type = sc.nextLine();
+                try{
+                    k = Integer.parseInt(type);
+                    goon=true;
+                }
+                catch (NumberFormatException ex){
+                    System.out.println("Error: Number not valid.");
+                }
+            }while (!goon);
+
+            //flag = true to execute stemming
+            //flag = false to not execute stemming
             long start = System.currentTimeMillis();
             tokens = TextPreprocesser.executeTextPreprocessing(query);
 
@@ -76,8 +89,7 @@ public class Main {
                 continue;
             }
 
-
-            QueryPreprocesser.executeQueryProcesser(tokens);
+            QueryPreprocesser.executeQueryProcesser(tokens, k);
             long end = System.currentTimeMillis() - start;
             System.out.println("Query executed in: " + end + " ms");
             tokens.clear();

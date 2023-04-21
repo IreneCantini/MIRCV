@@ -2,12 +2,9 @@ package it.unipi.dii.aide.mircv.query_processing;
 
 import it.unipi.dii.aide.mircv.common.data_structures.Flags;
 import it.unipi.dii.aide.mircv.common.data_structures.PostingList;
-import it.unipi.dii.aide.mircv.common.data_structures.Posting;
 import it.unipi.dii.aide.mircv.query_processing.Algorithms.ConjunctiveQuery;
-import it.unipi.dii.aide.mircv.query_processing.Algorithms.DAAT;
 import it.unipi.dii.aide.mircv.query_processing.document_score.DocumentScore;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.*;
 
@@ -39,13 +36,13 @@ public class QueryPreprocesser {
     }
 
     /**
-     *
+     * Per provare il MaxScore mettere ! agli if segnati con TODO
      * @param tokens
      * @throws IOException
      * @throws InterruptedException
      */
 
-    public static void executeQueryProcesser(ArrayList<String> tokens) throws IOException, InterruptedException {
+    public static void executeQueryProcesser(ArrayList<String> tokens, int k) throws IOException, InterruptedException {
 
         int pos=0;
         for(String t: tokens){
@@ -53,12 +50,12 @@ public class QueryPreprocesser {
             pl.getPl().clear();
             pl.setTerm(t);
 
-            boolean founded = pl.obtainPostingList(t);
+            pl.obtainPostingList(t);
 
-            if (!founded) {
+            if(pl.getPl().size() == 0 || pl.getPl()==null){
+                // the term is not present in the dictionary
                 continue;
             }
-
 
             plQueryTerm.add(pl);
 
@@ -74,19 +71,16 @@ public class QueryPreprocesser {
             pos++;
         }
 
+        PriorityQueue<DocumentScore> pQueueResult;
 
+        if(plQueryTerm == null || plQueryTerm.size()==0){
+            System.out.println("All the query words are not present in the dictionary");
+            return;
+        }
 
         if(Flags.isQueryMode()){
-            PriorityQueue<DocumentScore> pQueueResult = ConjunctiveQuery.executeConjunctiveQuery(10);
-            if (pQueueResult.isEmpty())
-                System.out.println("< Nessun documento :( >");
-            else {
-                while(!pQueueResult.isEmpty()) {
-                    DocumentScore d = pQueueResult.poll();
-                    System.out.println("Conjunctive:  <" + d.getDocid() + ", " + d.getScore() + ">");
-                }
-            }
-
+            pQueueResult = ConjunctiveQuery.executeConjunctiveQuery(k);
+            System.out.println("Conjunctive query results: ");
         }else {
             if (Flags.isMaxScore_flag()) {
                 // ordinamento posting list in base allo score
@@ -98,21 +92,21 @@ public class QueryPreprocesser {
 
                 orderedMaxScore = new ArrayList<>(hm_PosScore.values());
 
-                PriorityQueue<DocumentScore> pQueueResult = executeMaxScore(10);
-
-                while(!pQueueResult.isEmpty()) {
-                    DocumentScore d = pQueueResult.poll();
-                    System.out.println("MaxScore:  <" + d.getDocid() + ", " + d.getScore() + ">");
-                }
+                pQueueResult = executeMaxScore(k);
+                System.out.println("MaxScore results: ");
 
             } else {
-                PriorityQueue<DocumentScore> pQueueResult = executeDAAT(10);
-                while(!pQueueResult.isEmpty()) {
-                    DocumentScore d = pQueueResult.poll();
-                    System.out.println("DAAT:  <" + d.getDocid() + ", " + d.getScore() + ">");
-                }
+                pQueueResult = executeDAAT(k);
+                System.out.println("DAAT results: ");
             }
+        }
 
+        int rank=1;
+        System.out.println("size queue: "+ pQueueResult.size());
+        while (pQueueResult.size()!=0 && rank!=k+1) {
+            DocumentScore d = pQueueResult.poll();
+            System.out.println(rank + ": " + d.getDocid() + ", score: "+d.getScore());
+            rank++;
         }
 
         if(orderedMaxScore!=null)
@@ -129,61 +123,7 @@ public class QueryPreprocesser {
 
         if(hm_PosLen!=null)
             hm_PosLen.clear();
+
+        pQueueResult.clear();
     }
-
-/*
-    public static ArrayList<Long> executeConjunctiveQuery(){
-        // Order the posting list in increasing order of length
-        hm_PosLen = (HashMap<Integer, Integer>) sortByValue(hm_PosLen);
-
-        for (Map.Entry<Integer, Double> entry: hm_PosScore.entrySet()){
-            orderedPlQueryTerm.add(plQueryTerm.get(entry.getKey()));
-        }
-
-        // Array to maintain for each posting list the position of the docID to analyze
-        // At the beginning they are all zero because we start from the first position
-        //ArrayList<Integer> pos=new ArrayList<>(Collections.nCopies(QueryPreprocesser.orderedPlQueryTerm.size(), 0));
-        Long current;
-        int posFinal;
-        int currentPos;
-        ArrayList<Long> finalDocIdList = new ArrayList<>();
-        ArrayList<Long> temp = new ArrayList<>();
-
-        for (Posting p: orderedPlQueryTerm.get(0).getPl())
-            finalDocIdList.add(p.getDocID());
-
-        //binary merge boolean conjunctive algorithm
-        for(int i=1; i<orderedPlQueryTerm.size(); i++){
-            posFinal=0;
-            temp.clear();
-            current=finalDocIdList.get(posFinal);
-            while (true){
-                currentPos=orderedPlQueryTerm.get(i).next(current, 0);
-                if(currentPos>0){
-                    if(orderedPlQueryTerm.get(i).getPl().get(currentPos).getDocID()==current){
-                        // docid found
-                        temp.add(current);
-                    }
-                }
-
-                posFinal++;
-                if(posFinal==finalDocIdList.size() || currentPos<0)
-                    break;
-
-                current=finalDocIdList.get(posFinal);
-            }
-
-            finalDocIdList.clear();
-            finalDocIdList.addAll(temp);
-            if(finalDocIdList.size()==0){
-                // there aren't common docId
-                // the query doesn't produce results
-                return null;
-            }
-        }
-
-        return finalDocIdList;
-    }
-
-*/
 }
