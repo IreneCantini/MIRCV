@@ -17,10 +17,6 @@ public class OrderedList {
         return index;
     }
 
-    public void setTerm(String term) {
-        this.term = term;
-    }
-
     public void setIndex(int index) {
         this.index = index;
     }

@@ -1,98 +1,109 @@
 package it.unipi.dii.aide.mircv.cli;
 
 import it.unipi.dii.aide.mircv.cli.utils.UploadDataStructures;
-import it.unipi.dii.aide.mircv.common.data_structures.CollectionInfo;
 import it.unipi.dii.aide.mircv.common.data_structures.Flags;
 import it.unipi.dii.aide.mircv.common.text_preprocessing.TextPreprocesser;
 import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        System.out.println("*** Welcome! ***");
+        System.out.println("*** ACADEMIC SEARCH ENGINE ***");
 
-        //retrieve Collection info
-        System.out.println("\nLoading Collection information ... ");
+        /* Retrieve Collection info */
+        System.out.println("\nLoading Collection information... ");
         UploadDataStructures.readCollectionInfoFromDisk();
 
-        //retrieve data structures from disk
+        /* Retrieve Flags from disk */
         System.out.println("\nLoading Flag information... ");
         UploadDataStructures.readFlagsFromDisk();
+
+        /* Retrieve Document Index */
         System.out.println("\nLoading Document index... ");
         UploadDataStructures.readDocumentIndexFromDisk();
+
+        /* Retrieve Dictionary */
         System.out.println("\nLoading Dictionary... ");
         UploadDataStructures.readDictionaryFromDisk();
 
+        /* Query inserted by the user */
         String query;
+
+        /* Tokens that compose the query */
         ArrayList<String> tokens;
+
+        /* Type of the query requested by the user */
         String type;
-        int k=-1;
-        boolean goon=false;
+        int k = -1;
+        boolean goOn = false;
         
-        while(true) {
+        while (true) {
+
+            /* Insert the query */
             System.out.println("\nWrite Query or 'exit' command to terminate: ");
-            Scanner sc=new Scanner(System.in);
+            Scanner sc = new Scanner(System.in);
             query = sc.nextLine();
 
-            if(query==null || query.isEmpty()){
-                System.out.println("Error: Insert a correct query.");
+            /* If the query is null or empty, returns error and go on */
+            if (query == null || query.isEmpty()){
+                System.out.println("(ERROR) Insert a correct query.");
                 continue;
             }
 
-            if(query.equals("exit"))
+            /* If the query's text is equals to 'exit' terminate the program */
+            if (query.equals("exit"))
                 break;
 
-            do{
-                System.out.println("Write: 1 -> to execute conjunctive query , 2 -> to execute disjunctive query");
-                sc=new Scanner(System.in);
+            /* Select from Conjunctive Queries and Disjunctive Queries */
+            do {
+                System.out.println("SELECT ONE OF THIS POSSIBLES CHOICE:\n1: To execute Conjunctive Query\n2: To execute Disjunctive Query");
+                sc = new Scanner(System.in);
                 type = sc.nextLine();
-            }while (!type.equals("1") && !type.equals("2"));
+            } while (!type.equals("1") && !type.equals("2"));
 
-            if(type.equals("1"))
+            if (type.equals("1"))
                 Flags.setQueryMode(true);
             else {
                 Flags.setQueryMode(false);
-                do{
-                    System.out.println("Write: 1 -> to execute DAAT, 2 -> to execute MaxScore  ");
+
+                do {
+                    System.out.println("SELECT ONE OF THIS POSSIBLES CHOICE:\n1: To execute DAAT\n2: To execute MaxScore");
                     sc=new Scanner(System.in);
                     type = sc.nextLine();
-                }while (!type.equals("1") && !type.equals("2"));
+                } while (!type.equals("1") && !type.equals("2"));
             }
 
             Flags.setMaxScore_flag(type.equals("2"));
 
-            do{
+            do {
                 System.out.println("Write the number of document you want to retrieve: ");
-                sc=new Scanner(System.in);
+                sc = new Scanner(System.in);
                 type = sc.nextLine();
-                try{
+
+                try {
                     k = Integer.parseInt(type);
-                    goon=true;
+                    goOn = true;
+                } catch (NumberFormatException ex){
+                    System.out.println("(ERROR) Number not valid.");
                 }
-                catch (NumberFormatException ex){
-                    System.out.println("Error: Number not valid.");
-                }
-            }while (!goon);
+            } while (!goOn);
 
-            //flag = true to execute stemming
-            //flag = false to not execute stemming
-
+            /* Pre-process the query */
             tokens = TextPreprocesser.executeTextPreprocessing(query);
 
             if (tokens.size() == 0) {
-                System.out.println("Query not valid!");
+                System.out.println("(ERROR) Query not valid!");
                 continue;
             }
 
             long start = System.currentTimeMillis();
             QueryPreprocesser.executeQueryProcesser(tokens, k);
             long end = System.currentTimeMillis() - start;
-            System.out.println("Query executed in: " + end + " ms");
+            System.out.println("\n(INFO) Query executed in: " + end + " ms");
             tokens.clear();
         }
     }

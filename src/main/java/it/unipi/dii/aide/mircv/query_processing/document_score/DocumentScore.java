@@ -21,16 +21,13 @@ public class DocumentScore {
         this.docid = docid;
     }
 
-    public void setScore(double score) {
-        this.score = score;
-    }
-
     @Override
     public boolean equals(Object o){
-        if(o instanceof DocumentScore){
-            DocumentScore c = (DocumentScore) o;
+
+        if (o instanceof DocumentScore c){
             return docid == c.getDocid();
         }
+
         return false;
     }
 }

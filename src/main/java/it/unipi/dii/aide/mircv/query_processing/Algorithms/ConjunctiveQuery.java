@@ -16,47 +16,53 @@ import static it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser.plQuery
 
 public class ConjunctiveQuery {
 
+    /**
+     * Function that perform the conjunctive query
+     * @param k number of docs returned
+     * @return a priority queue containing the top k docs
+     * @throws IOException if the channel is not found
+     */
     public static PriorityQueue<DocumentScore> executeConjunctiveQuery(int k) throws IOException {
 
-        // Priority queue to maintain the docIds with the highest score in decreasing order
+        /* Temporary score */
+        double score;
+
+        /* Temporary variables */
+        long current_docid;
+        boolean firstTime=true;
+
+        /* Priority queue to maintain the docIds with the highest score in decreasing order */
         PriorityQueue<DocumentScore> decPQueue
                 = new PriorityQueue<>(k, new DecComparatorScore());
 
-        // Priority queue to maintain the docIds with the highest score in increasing order
-        // it is used to maintain the smallest score
+        /* Priority queue to maintain the docIds with the highest score in increasing order
+           (it is used to maintain the smallest score)
+        */
         PriorityQueue<DocumentScore> incPQueue
                 = new PriorityQueue<>(k, new IncComparatorScore());
 
-        // Order the posting list in increasing order of length
+        /* Order the posting list in increasing order of length */
         QueryPreprocesser.hm_PosLen = (HashMap<Integer, Integer>) QueryPreprocesser.sortByValue(QueryPreprocesser.hm_PosLen);
 
-        for (Map.Entry<Integer, Integer> entry: QueryPreprocesser.hm_PosLen.entrySet()){
+        for (Map.Entry<Integer, Integer> entry: QueryPreprocesser.hm_PosLen.entrySet())
             QueryPreprocesser.orderedPlQueryTerm.add(plQueryTerm.get(entry.getKey()));
-        }
 
-        double score; // Temporary score
+        /* Loop until all the docIDs of the first posting list have been processed */
+        while (true) {
 
-        // temporary variable
-        DocumentScore ds;
-        long current_docid = 0;
-        boolean firstTime=true;
-
-        //Loop until all the docId of the first postinglist have been processed
-        while(true) {
-
-            // fetch the first docid to analyze
-            // it is the shortest one presents in all the posting list
-            do{
-                if(!firstTime)
+            /* fetch the first docid to analyze it is the shortest one presents in all the posting list */
+            do {
+                if (!firstTime)
                     orderedPlQueryTerm.get(0).nextPosting();
 
-                firstTime=false;
-                if(orderedPlQueryTerm.get(0).getActualPosting()==null)
+                firstTime = false;
+                if (orderedPlQueryTerm.get(0).getActualPosting() == null)
                     return decPQueue;
-                // Keep the candidate docid from the shortest posting list
+
+                /* Keep the candidate docID from the shortest posting list */
                 current_docid = orderedPlQueryTerm.get(0).getActualPosting().getDocID();
 
-            }while (!checkAllPostingList(current_docid));
+            } while(!checkAllPostingList(current_docid));
 
             score = 0;
 
@@ -68,33 +74,35 @@ public class ConjunctiveQuery {
                     score += Score.TFIDF(postingList.getTerm(), postingList.getActualPosting());
             }
 
-            if(decPQueue.size()<k){
+            if (decPQueue.size() < k) {
 
                 decPQueue.add(new DocumentScore(current_docid, score));
                 incPQueue.add(new DocumentScore(current_docid, score));
-            } else {
+            }else {
 
                 if (incPQueue.peek().getScore() < score) {
                     decPQueue.add(new DocumentScore(current_docid, score));
                     incPQueue.add(new DocumentScore(current_docid, score));
-                    //remove from decPQueue e incPQueue the element with the smallest score
+
+                    /* Remove from decPQueue e incPQueue the element with the smallest score */
                     decPQueue.remove(incPQueue.poll());
                 }
             }
 
-            // there isn't any other docid in the shortest posting list
-            if(!orderedPlQueryTerm.get(0).postingIterator.hasNext())
+            /* There isn't any other docID in the shortest posting list */
+            if (!orderedPlQueryTerm.get(0).postingIterator.hasNext())
                 return decPQueue;
         }
     }
 
     private static boolean checkAllPostingList(Long docid) throws IOException {
-        for(PostingList pl: orderedPlQueryTerm){
+
+        for (PostingList pl: orderedPlQueryTerm) {
             pl.nextGEQ(docid);
-            if(pl.getActualPosting() == null)
+
+            if (pl.getActualPosting() == null)
                 return false;
         }
         return true;
     }
-
 }

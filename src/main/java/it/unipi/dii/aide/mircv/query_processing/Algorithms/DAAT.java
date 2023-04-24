@@ -9,76 +9,101 @@ import it.unipi.dii.aide.mircv.query_processing.document_score.IncComparatorScor
 import it.unipi.dii.aide.mircv.query_processing.utils.Score;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.PriorityQueue;
 
 import static it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser.plQueryTerm;
-import static it.unipi.dii.aide.mircv.query_processing.utils.QueryUtils.minimumDocID;
 
 public class DAAT {
 
+    /**
+     * Function that performs the DAAT algorithm
+     * @param k the number of how many top documents will be returned
+     * @return a priority queue containing the docs
+     * @throws IOException if the channel is not found
+     */
     public static PriorityQueue<DocumentScore> executeDAAT(int k) throws IOException {
 
-        // Priority queue to maintain the docIds with the highest score in decreasing order
+        /* Priority queue to maintain the docIds with the highest score in decreasing order */
         PriorityQueue<DocumentScore> decPQueue
                 = new PriorityQueue<>(k, new DecComparatorScore());
 
-        // Priority queue to maintain the docIds with the highest score in increasing order
-        // it is used to maintain the smallest score
+        /* Priority queue to maintain the docIds with the highest score in increasing order
+           (it is used to maintain the smallest score)
+        */
         PriorityQueue<DocumentScore> incPQueue
                 = new PriorityQueue<>(k, new IncComparatorScore());
 
-        double score; // Variabili contenente lo score temporaneo
-        long next;  // Variabile utile per salvarsi il prossimo docId da dover analizzare
+        /* Temporary score */
+        double score;
 
-        long current_docid = minimumDocID(); // Prendo il docId più piccolo tra quelli contenuti all'interno delle
-        // posting list dei termini della query
-        //Ciclo fino a quando non ho finito di analizzare tutti i documenti delle posting list
+        /* Next docID to analyze */
+        long next;
+
+        /* Take the smallest docId among those contained within the query term posting lists */
+        long current_docid = minimumDocID();
+
+        /* Cycle until I have finished analyzing all the documents on the posting lists */
         while(true) {
 
             score = 0;
-            next = CollectionInfo.getDocid_counter()+1;
-
+            next = CollectionInfo.getDocid_counter() + 1;
 
             for (PostingList postingList : plQueryTerm) {
+
                 if (postingList.getActualPosting() == null)
                     continue;
+
                 if (postingList.getActualPosting().getDocID() == current_docid) {
                     if (Flags.isScoreMode())
                         score += Score.BM25(postingList.getTerm(), postingList.getActualPosting(), 1.2, 0.75);
                     else
                         score += Score.TFIDF(postingList.getTerm(), postingList.getActualPosting());
+
                     postingList.nextPosting();
                 }
-                // Se ho finito i posting all'interno della posting list devo proseguire senza scorrere
+
+                /* If run out of postings within the posting list, must continue without scrolling */
                 if (postingList.getActualPosting() == null)
                     continue;
 
-                // Altrimenti scorro e lo confronto con il valore di next
+                /* Otherwise scroll and compare it with the value of next */
                 if (postingList.getActualPosting().getDocID() < next) {
                     next = postingList.getActualPosting().getDocID();
                 }
             }
 
-            if(decPQueue.size()<k){
+            if (decPQueue.size() < k){
 
                 decPQueue.add(new DocumentScore(current_docid, score));
                 incPQueue.add(new DocumentScore(current_docid, score));
-            } else {
+            }else {
 
                 if (incPQueue.peek().getScore() < score) {
                     decPQueue.add(new DocumentScore(current_docid, score));
                     incPQueue.add(new DocumentScore(current_docid, score));
-                    //remove from decPQueue e incPQueue the element with the smallest score
+
+                    /* Remove from decPQueue e incPQueue the element with the smallest score */
                     decPQueue.remove(incPQueue.poll());
                 }
             }
 
             if (current_docid == next)
                 break;
-            current_docid = next;
 
+            current_docid = next;
+        }
+        return decPQueue;
+    }
+
+    public static long minimumDocID(){
+        ArrayList<Long> docid_candidate = new ArrayList<>();
+
+        for(PostingList pl: plQueryTerm){
+            docid_candidate.add(pl.getPl().get(0).getDocID());
         }
 
-        return decPQueue;
+        return Collections.min(docid_candidate);
     }
 }
