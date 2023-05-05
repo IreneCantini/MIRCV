@@ -30,7 +30,5 @@ When a user submits a query, the first step is to pre-process the query text usi
 This typically involves tasks such as tokenization, stop word removal, stemming or lemmatization, and possibly other techniques to prepare the query text for searching.
 After the query has been pre-processed, the user can specify various parameters for the search, including the number of documents to be returned, which scoring strategy to use (DAAT or MaxScore), and which scoring function to use (BM25 or TF-IDF).
 
-### Details
-
 
 [MSMARCO]: <https://microsoft.github.io/msmarco/TREC-Deep-Learning-2020>
