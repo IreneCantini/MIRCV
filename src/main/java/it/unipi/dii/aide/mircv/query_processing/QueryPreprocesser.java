@@ -94,6 +94,7 @@ public class QueryPreprocesser {
         }
 
         int rank = 1;
+
         System.out.println("\n*** TOP " + k + " DOCUMENTS RETRIEVED ***\n");
 
         String leftAlignFormat = "\t| %-15d | %-4s |%n";

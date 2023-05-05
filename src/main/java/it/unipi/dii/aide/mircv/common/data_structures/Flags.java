@@ -27,7 +27,7 @@ public class Flags {
     private static boolean debug_flag;
 
     /* TRUE: BM25  FALSE: TFIDF */
-    private static final boolean scoreMode = true;
+    private static boolean scoreMode = true;
 
     /* TRUE: Conjunctive Query  FALSE: Disjunctive Query */
     private static boolean queryMode;
@@ -116,6 +116,8 @@ public class Flags {
     }
 
     public static void setQueryMode(boolean queryMode) {Flags.queryMode = queryMode;    }
+
+    public static void setScoreMode(boolean scoreMode) { Flags.scoreMode = scoreMode;}
 
     public static boolean isCompression_flag() {
         return !compression_flag;
