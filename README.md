@@ -22,6 +22,11 @@ inverted_index_doc  | Contains all the posting lists for each document | 749.3 M
 inverted_index_freq  | Contains all the frequencies for a term for each document | 59.1 MB | .dat
 skipping_file  | Contains the skipping list structure | 56 byte | .dat
 stopwords  | Contains all the stopwords | 4 KB | .txt
+   
+   
+### Queries
+
+### Details
 
 
 [MSMARCO]: <https://microsoft.github.io/msmarco/TREC-Deep-Learning-2020>
