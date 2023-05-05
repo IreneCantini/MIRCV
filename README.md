@@ -13,6 +13,8 @@
     * be able to perform conjunctive and disjunctive queries and should have a demo interface that reads user queries via a command line prompt and returns       the <pid> of each result.
      
 ### Files
+
+the size of these files may change depending on the type of index construction selected.
    
    Name  | Description | Size | Extension
 ------------- | ------------- | ------------- | -------------
