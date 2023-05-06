@@ -6,6 +6,8 @@ import it.unipi.dii.aide.mircv.common.text_preprocessing.TextPreprocesser;
 import it.unipi.dii.aide.mircv.query_processing.QueryPreprocesser;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Main {
@@ -29,6 +31,9 @@ public class Main {
         /* Retrieve Dictionary */
         System.out.println("\nLoading Dictionary... ");
         UploadDataStructures.readDictionaryFromDisk();
+
+        /* Retrieve Stopwords list */
+        TextPreprocesser.stopwords_global= Files.readAllLines(Paths.get("src/main/resources/stopwords.txt"));
 
         /* Query inserted by the user */
         String query;
