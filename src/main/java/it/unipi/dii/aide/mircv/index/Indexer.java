@@ -50,5 +50,8 @@ public class Indexer {
         long time = (end/1000)/60;
 
         System.out.println("(INFO) Inverted Index built in: " + time + " minutes");
+
+        time = (SPIMI.timeTextPreprocessing/1000)/60;
+        System.out.println("(INFO) Total time to execute text preprocesser: " + time + " minutes");
     }
 }

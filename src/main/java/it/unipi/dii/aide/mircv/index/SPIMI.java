@@ -7,6 +7,8 @@ import it.unipi.dii.aide.mircv.index.utils.IndexUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static it.unipi.dii.aide.mircv.common.file_management.FileUtils.collection_length;
@@ -36,6 +38,8 @@ public class SPIMI {
     /* Average document length variable */
     public static double avdl = 0;
 
+    public static long timeTextPreprocessing=0;
+
     public static void executeSPIMI(String path_collection) throws IOException, InterruptedException {
 
         int freq;
@@ -53,8 +57,13 @@ public class SPIMI {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path_collection), StandardCharsets.UTF_8));
         String line = reader.readLine();
 
+        TextPreprocesser.stopwords_global= Files.readAllLines(Paths.get("src/main/resources/stopwords.txt"));
+
         while (line != null) {
+            long start = System.currentTimeMillis();
             tokens = TextPreprocesser.executeTextPreprocessing(line);
+            long end = System.currentTimeMillis() - start;
+            timeTextPreprocessing+=end;
 
             docid = docid + 1;
             docNo = tokens.get(0);

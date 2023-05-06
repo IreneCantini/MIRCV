@@ -16,6 +16,8 @@ import java.util.stream.Stream;
 
 public class TextPreprocesser {
 
+    public static List<String> stopwords_global;
+
     /**
      * Function that is used for removing Unicode chars during text cleaning
      * @param s is the string to preprocess
@@ -105,8 +107,8 @@ public class TextPreprocesser {
      */
     public static ArrayList<String> removeStopwords(ArrayList<String> tokens) throws IOException {
 
-        List<String> stopwords = Files.readAllLines(Paths.get("src/main/resources/stopwords.txt"));
-        tokens.removeAll(stopwords);
+        //List<String> stopwords = Files.readAllLines(Paths.get("src/main/resources/stopwords.txt"));
+        tokens.removeAll(stopwords_global);
 
         return tokens;
     }
