@@ -10,6 +10,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class TestPerformanceMain {
@@ -33,6 +35,10 @@ public class TestPerformanceMain {
         /* Retrieve Dictionary from disk */
         System.out.println("\nLoading Dictionary... ");
         UploadDataStructures.readDictionaryFromDisk();
+
+        /* Retrieve Stopwords list */
+        TextPreprocesser.stopwords_global= Files.readAllLines(Paths.get("src/main/resources/stopwords.txt"));
+
 
         while (true) {
             String query;
