@@ -50,7 +50,7 @@ public class ConjunctiveQuery {
         /* Loop until all the docIDs of the first posting list have been processed */
         while (true) {
 
-            /* fetch the first docid to analyze it is the shortest one presents in all the posting list */
+            /* fetch the first docid, present in all the posting list, among those not yet processed */
             do {
                 if (!firstTime)
                     orderedPlQueryTerm.get(0).nextPosting();

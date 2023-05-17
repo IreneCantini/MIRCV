@@ -85,6 +85,14 @@ public class Main {
             Flags.setMaxScore_flag(type.equals("2"));
 
             do {
+                System.out.println("\nSELECT ONE OF THIS POSSIBLES CHOICE:\n1 -> To use TFIDF\n2 -> To use BM25");
+                sc = new Scanner(System.in);
+                type = sc.nextLine();
+            } while (!type.equals("1") && !type.equals("2"));
+
+            Flags.setScoreMode(type.equals("2"));
+
+            do {
                 System.out.println("Write the number of document you want to retrieve: ");
                 sc = new Scanner(System.in);
                 type = sc.nextLine();
