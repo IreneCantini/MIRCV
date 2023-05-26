@@ -12,7 +12,7 @@ It is composed by three principal parts:
 
 ## Execute Index construction
 To build the index it is important adding two files in src\main\resources:
-- a file named "collection.tsv" containing the document collection available at [MSMARCO]
+- a file named "collection.tsv" containing the document collection available at https://microsoft.github.io/msmarco/TREC-Deep-Learning-2020
 - a file named "stopword.txt" containing the english stopword (it could be downloaded online)
 
 The executable file is inside the path: src\main\java\it\unipi\dii\aide\mircv\index\Indexer.java
