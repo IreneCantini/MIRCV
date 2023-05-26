@@ -37,7 +37,7 @@ After the program has been launched you have to insert the desidered query and t
 Then you have to insert also the number (k) of documents you want to obtain for the inserted query.
 After that the program shows you the list of the top k ranked documents with the corresponding scores.
 
-## Execute performance evaluation
+## Execute Performance evaluation
 To test the system performancce you need to add the test file, named "test.tsv" in src\main\resources that you can download from https://microsoft.github.io/msmarco/TREC-Deep-Learning-2020.
 
 The executable file is inside the path: src\main\java\it\unipi\dii\aide\mircv\query_processing\test_performance\TestPerformanceMain.java
