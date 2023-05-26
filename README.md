@@ -1,36 +1,48 @@
-# Multimedia Information Retrieval and Computer Vision
+# Information Retrieval System
 ## _Search Engine_
 
 ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJIDEA-000000.svg?style=for-the-badge&logo=intellij-idea&logoColor=white) ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white)
 
-## Features
+## Introduction to the project
+This project deals with the topic of information retrieval. It constructs a search engine in which user translates her/his information needs into queries and obtains a list of documents that the system considers most relevant based on scores computed with different metrics. 
+It is composed by three principal parts:
+1. The Index construction
+2. The queries processing
+3. The performance evaluation
 
-* The program should: 
-    * use the document collection available at [MSMARCO], which is a collection of 8.8 million documents about 2.2GB in size;
-    * read the data using UNICODE, removing punctuation signs and dealing with any errors in the data. 
-    * create an inverted index, lexicon, and document table structures and store them on disk. 
-    * execute ranked queries using an interface similar to openList(), closeList(), next(), getDocid(), and getFreq() on inverted lists, returning the top       10 or 20 results according to the TFIDF scoring function. 
-    * be able to perform conjunctive and disjunctive queries and should have a demo interface that reads user queries via a command line prompt and returns       the <pid> of each result.
-     
-### Files
+## Execute Index construction
+To build the index it is important adding two files in src\main\resources:
+- a file named "collection.tsv" containing the document collection available at [MSMARCO]
+- a file named "stopword.txt" containing the english stopword (it could be downloaded online)
 
-the size of these files may change depending on the type of index construction selected.
-   
-   Name  | Description | Size | Extension
-------------- | ------------- | ------------- | -------------
-dictionary  | Contains statistics about the term | 69.3 MB | .dat
-document_index  | Contains information about the document | 318.3 MB | .dat
-inverted_index_doc  | Contains all the posting lists for each document | 749.3 MB | .dat
-inverted_index_freq  | Contains all the frequencies for a term for each document | 59.1 MB | .dat
-skipping_file  | Contains the skipping list structure | 56 byte | .dat
-stopwords  | Contains all the stopwords | 4 KB | .txt
-   
-   
-### Queries
-   
-When a user submits a query, the first step is to pre-process the query text using the same text pre-processing techniques that were used to construct the inverted index.
-This typically involves tasks such as tokenization, stop word removal, stemming or lemmatization, and possibly other techniques to prepare the query text for searching.
-After the query has been pre-processed, the user can specify various parameters for the search, including the number of documents to be returned, which scoring strategy to use (DAAT or MaxScore), and which scoring function to use (BM25 or TF-IDF).
+The executable file is inside the path: src\main\java\it\unipi\dii\aide\mircv\index\Indexer.java
+After the program has been launched you have to answer to three questions, displayed by the command line interface, in order to set some preferences about compression, filtering and debug mode. 
+The costruction takes, in average, 30 minutes to execute and after that you will have 7 new files saved in src\main\resources. They will be:
+- collection_info
+- docid_posting_lists
+- document_index 
+- flags
+- freq_posting_lists
+- skipping
+- vocabulary 
 
+These files will be used in the next phases.
 
-[MSMARCO]: <https://microsoft.github.io/msmarco/TREC-Deep-Learning-2020>
+## Execute Queries processing
+The executable file is inside the path: src\main\java\it\unipi\dii\aide\mircv\cli\Main.java
+After the program has been launched you have to insert the desidered query and to answer to three questions, displayed by the command line interface, in order to select one of two possible options:
+- Disjunctive or Conjunctive queries
+- DAAT or MaxScore
+- TFIDF or BM25
+Then you have to insert also the number (k) of documents you want to obtain for the inserted query.
+After that the program shows you the list of the top k ranked documents with the corresponding scores.
+
+## Execute performance evaluation
+To test the system performancce you need to add the test file, named "test.tsv" in src\main\resources that you can download from https://microsoft.github.io/msmarco/TREC-Deep-Learning-2020.
+
+The executable file is inside the path: src\main\java\it\unipi\dii\aide\mircv\query_processing\test_performance\TestPerformanceMain.java
+After the program has been launched you have to answer to three questions, displayed by the command line interface, in order to select one of two possible options:
+- Disjunctive or Conjunctive queries
+- DAAT or MaxScore
+- TFIDF or BM25
+At the end of the execution the program shows the list of documents retrieved for each query with the corresponding response time (considering 5 documents per query) and average response time.
